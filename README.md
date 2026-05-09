@@ -50,7 +50,7 @@ touching any code.
 
 ## Mobile
 
-<img src="https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_hero.jpg" width="300" alt="Mobile Hero">
+
 
 <img src="https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_fullpage.jpg" width="300" alt="Mobile Full Page">
 
