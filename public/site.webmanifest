@@ -1,6 +1,6 @@
 {
   "name": "The Firmament",
-  "short_name": "FRMNT",
+  "short_name": "Firmament",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -15,7 +15,7 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#575353",
-  "background_color": "#adadad",
+  "theme_color": "#04080f",
+  "background_color": "#04080f",
   "display": "standalone"
 }
