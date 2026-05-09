@@ -383,6 +383,7 @@ const THEME_KEYS = [
   'character_enabled', 'character_name', 'character_tagline',
   'character_panel_width', 'character_blend_mode',
   'character_show_metrics', 'character_show_status', 'character_panel_side',
+  'character_mobile_panel',
   'hero_title', 'hero_subtitle', 'hero_show_scroll_indicator',
   'layout_card_style', 'layout_show_descriptions', 'layout_show_urls',
   'layout_desktop_columns',

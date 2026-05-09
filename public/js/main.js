@@ -858,30 +858,35 @@ async function bootFast() {
 
 // ── Mobile panel visibility ───────────────────────────────────────────────
 function applyMobilePanelVisibility(setting) {
-  const nowMobile   = Math.min(window.innerWidth, window.innerHeight) <= 768;
-  const panel       = document.getElementById('engel-panel');
-  const services    = document.getElementById('services');
+  const nowMobile    = Math.min(window.screen.width, window.screen.height) <= 768;
+  const panel        = document.getElementById('engel-panel');
+  const services     = document.getElementById('services');
   const mobileStatus = document.getElementById('mobile-status');
+  const panelOnLeft  = document.body.classList.contains('panel-left');
 
   if (nowMobile) {
     const mobilePanel = setting || 'hidden';
     if (mobilePanel === 'hidden') {
-      if (panel)       panel.style.display       = 'none';
+      if (panel) panel.style.display = 'none';
       if (services) {
         services.style.marginRight  = '0';
-        services.style.paddingRight = '1rem';
+        services.style.marginLeft   = '0';
+        services.style.paddingRight = panelOnLeft ? '' : '1rem';
+        services.style.paddingLeft  = panelOnLeft ? '1rem' : '';
       }
       if (mobileStatus) mobileStatus.style.display = 'block';
     } else {
-      if (panel)       panel.style.display       = '';
+      if (panel) panel.style.display = '';
       if (services) {
         services.style.marginRight  = '';
+        services.style.marginLeft   = '';
         services.style.paddingRight = '';
+        services.style.paddingLeft  = '';
       }
       if (mobileStatus) mobileStatus.style.display = 'none';
     }
   } else {
-    if (panel)       panel.style.display       = '';
+    if (panel)        panel.style.display        = '';
     if (mobileStatus) mobileStatus.style.display = 'none';
   }
 }

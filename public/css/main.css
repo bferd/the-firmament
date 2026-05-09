@@ -540,7 +540,7 @@ body::before {
 #main-content {
   min-height: 100vh;
   padding: 4rem var(--gutter) 4rem var(--gutter);
-  transition: padding-right var(--transition);
+  transition: padding-right var(--transition), padding-left var(--transition);
 }
 
 #main-content.panel-open {
@@ -1126,6 +1126,11 @@ body.panel-left #engel-panel.visible {
 body.panel-left #main-content.panel-open {
   padding-right: var(--gutter);
   padding-left: calc(var(--panel-w) + var(--gutter));
+}
+
+body.panel-left #services {
+  margin-right: 0;
+  margin-left: var(--panel-w);
 }
 
 /* ── Mobile status bar (shown when side panel is hidden on mobile) ─────────── */
