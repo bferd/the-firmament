@@ -63,7 +63,7 @@ the `/videos` directory:
 
 - Docker + Docker Compose
 - Authelia (for admin auth)
-- NPMplus or nginx reverse proxy
+- NPM, NPMplus or nginx reverse proxy
 - InfluxDB v2 with Proxmox metrics (optional)
 - Borg-UI (optional)
 
