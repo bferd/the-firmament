@@ -6,6 +6,8 @@ fully configurable admin panel.
 
 ![Hero](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-hero.png)
 
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support%20this%20project-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/schrothdotca)
+
 ## Features
 
 - AI guardian character with scroll-driven video animations
