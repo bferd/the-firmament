@@ -1,0 +1,35 @@
+# Secrets and environment
+.env
+*.env
+
+# Database (contains personal data)
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Videos (too large, personal)
+videos/*.mp4
+videos/*.webm
+
+# Fonts (user uploaded)
+fonts/
+
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# Claude Code settings
+.claude/
+CLAUDE.md
+.claudeignore

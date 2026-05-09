@@ -1,0 +1,23 @@
+services:
+  firmament:
+    build: .
+    container_name: firmament
+    restart: unless-stopped
+    ports:
+      - "192.168.1.165:3000:3000"
+    volumes:
+      - ./data:/app/data
+      - ./videos:/app/videos
+      - ./fonts:/app/fonts
+    environment:
+      - NODE_ENV=production
+      - DB_PATH=/app/data/firmament.db
+      - AUTHELIA_URL=http://192.168.1.156:9091
+      - NPMPLUS_IP=192.168.1.164
+    user: "1000:1000"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"

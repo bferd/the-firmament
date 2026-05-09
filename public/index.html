@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+  <title>The Firmament</title>
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" id="favicon-96">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" id="favicon-svg">
+  <link rel="shortcut icon" href="/favicon.ico" id="favicon-ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="The Firmament" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+
+  <!-- ── Announcement Banner ────────────────────────────────────────────── -->
+  <div id="announcement-banner" style="display:none" role="alert">
+    <span id="announcement-text"></span>
+    <button id="announcement-dismiss" type="button" aria-label="Dismiss">&#x2715;</button>
+  </div>
+
+  <!-- ── Transition overlay ──────────────────────────────────────────────── -->
+  <div id="transition-overlay" aria-hidden="true">
+    <video id="transition-video" src="/videos/engel-transition.webm" muted playsinline preload="auto"></video>
+  </div>
+
+  <!-- ── ENGEL Side Panel ────────────────────────────────────────────────── -->
+  <aside id="engel-panel" aria-label="ENGEL Guardian Panel">
+    <div class="panel-engel-name">ENGEL</div>
+    <video id="engel-panel-video" muted playsinline></video>
+    <div class="panel-label" id="panel-site-title">GUARDIAN OF THE FIRMAMENT</div>
+    <div id="panel-metrics-wrap">
+      <div class="panel-status" id="panel-status-line">
+        <span id="panel-status-dot" class="status-dot"></span>
+        <span id="panel-status-text">SYSTEMS NOMINAL</span>
+      </div>
+      <div id="panel-metrics-nodes"></div>
+      <div id="panel-backup-summary"></div>
+    </div>
+  </aside>
+
+  <!-- ── Hero ────────────────────────────────────────────────────────────── -->
+  <section id="hero" aria-label="ENGEL Guardian">
+    <div id="hero-mask">
+      <div class="mask-throbber">
+        <div class="throbber-ring"></div>
+        <div class="throbber-text">INITIALISING</div>
+      </div>
+    </div>
+    <video id="hero-bg-video" muted playsinline loop autoplay aria-hidden="true"></video>
+    <div class="hero-glow"></div>
+    <div class="hero-corner-bl"></div>
+    <div class="hero-corner-br"></div>
+
+    <div class="hero-header">
+      <h1 class="hero-title">THE FIRMAMENT</h1>
+      <p class="hero-subtitle">SCHROTH.CA HOMELAB</p>
+    </div>
+
+    <div id="engel-video-wrap">
+      <div class="video-glow" aria-hidden="true"></div>
+      <div id="hero-video-slot">
+        <video id="engel-video-a" muted playsinline preload="auto" aria-hidden="true"></video>
+        <video id="engel-video-b" muted playsinline preload="auto" aria-hidden="true"></video>
+      </div>
+    </div>
+
+    <div class="scroll-hint" aria-hidden="true">
+      <span>Scroll</span>
+      <svg viewBox="0 0 24 24">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ── Main Content ────────────────────────────────────────────────────── -->
+  <main id="main-content">
+    <header id="site-header">
+      <a href="/" class="site-logo">THE FIRMAMENT</a>
+      <div class="site-tagline" id="site-tagline">schroth.ca homelab</div>
+      <div class="header-divider"></div>
+      <div class="auth-badge" id="auth-badge">
+        <div class="auth-badge-user">
+          <span class="status-dot"></span>
+          <span id="auth-name"></span>
+        </div>
+      </div>
+    </header>
+
+    <div id="services" aria-label="Services"></div>
+
+    <footer id="footer">
+      <div class="footer-notice">
+        <span id="footer-text">Personal non-commercial use only</span>
+        &nbsp;·&nbsp;
+        <a href="/admin"><span id="admin-auth-dot" aria-hidden="true" title="Session active"></span>Admin</a>
+        <span id="footer-personal-section">&nbsp;·&nbsp;
+          &copy; <a id="footer-personal-link" href="https://linkstack.schroth.ca/@brad" target="_blank" rel="noopener noreferrer" class="footer-brad">Brad Schroth</a>
+        </span>
+      </div>
+    </footer>
+  </main>
+
+  <!-- ── Welcome Modal ──────────────────────────────────────────────────── -->
+  <div id="welcome-modal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="welcome-modal-title">
+    <div class="welcome-modal-backdrop"></div>
+    <div class="welcome-modal-content">
+      <h2 id="welcome-modal-title"></h2>
+      <p id="welcome-modal-body"></p>
+      <button id="welcome-modal-btn" type="button"></button>
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

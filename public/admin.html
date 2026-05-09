@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+  <title>Admin — The Firmament</title>
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="The Firmament" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/css/admin.css">
+  <!-- Theme style injection points (populated by applyAdminTheme) -->
+  <style id="scanline-style"></style>
+  <style id="custom-css"></style>
+</head>
+<body>
+
+  <!-- ── Mobile topbar ──────────────────────────────────────────────────── -->
+  <div id="mobile-topbar">
+    <button id="sidebar-toggle" aria-label="Open menu">&#9776;</button>
+    <span class="topbar-title">THE FIRMAMENT</span>
+    <span class="topbar-sub">Admin</span>
+  </div>
+
+  <!-- ── Sidebar overlay backdrop ───────────────────────────────────────── -->
+  <div id="sidebar-overlay"></div>
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+  <nav id="sidebar">
+    <div class="sidebar-brand">
+      <h1>THE FIRMAMENT</h1>
+      <p>Admin Console</p>
+    </div>
+
+    <button id="sidebar-close" aria-label="Close menu">&#10005;</button>
+
+    <div class="sidebar-nav">
+      <div class="nav-item" data-panel="live-metrics">
+        <span class="nav-icon">📊</span> Live Metrics
+      </div>
+      <div class="nav-item" data-panel="services">
+        <span class="nav-icon">🔗</span> Services
+      </div>
+      <div class="nav-item" data-panel="settings">
+        <span class="nav-icon">⚙️</span> Settings
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="/">← Back to Portal</a>
+      <a href="https://auth.schroth.ca/logout?rd=https://schroth.ca" id="admin-logout-link">Log Out</a>
+    </div>
+  </nav>
+
+  <!-- ── Main ────────────────────────────────────────────────────────────── -->
+  <main id="admin-main">
+
+    <!-- Services Panel (includes categories) -->
+    <div id="panel-services" class="panel">
+      <div class="panel-title">SERVICES</div>
+      <div class="panel-desc">Manage homelab services. Drag rows to reorder.</div>
+
+      <div class="admin-card">
+        <div class="admin-card-title">Add Service</div>
+        <form id="add-svc-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Name</label>
+              <input id="new-svc-name" type="text" placeholder="Plex" required>
+            </div>
+            <div class="form-group">
+              <label>URL</label>
+              <input id="new-svc-url" type="url" placeholder="https://plex.schroth.ca" required>
+            </div>
+            <div class="form-group">
+              <label>Icon (emoji)</label>
+              <input id="new-svc-icon" type="text" placeholder="🎬" maxlength="4">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Category</label>
+              <select id="new-svc-cat" class="cat-select">
+                <option value="">— none —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Accent Colour</label>
+              <input id="new-svc-accent" type="color" value="#00e5ff">
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <div class="checkbox-row">
+                <input id="new-svc-auth" type="checkbox">
+                <label for="new-svc-auth">Requires auth</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="flex:1 1 100%">
+              <label>Description</label>
+              <textarea id="new-svc-desc" rows="2" placeholder="Brief description of this service"></textarea>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Host name (offline detection)</label>
+              <select id="new-svc-host-name">
+                <option value="">-- None (always online) --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <div class="checkbox-row">
+                <input id="new-svc-disable-offline" type="checkbox">
+                <label for="new-svc-disable-offline">Disable card if host offline</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Add Service</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Edit form (hidden until edit clicked) -->
+      <div class="admin-card" id="edit-svc-form" style="display:none;border-color:rgba(0,229,255,0.3)">
+        <div class="admin-card-title">Edit Service</div>
+        <form>
+          <input type="hidden" id="edit-svc-id">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Name</label>
+              <input id="edit-svc-name" type="text" required>
+            </div>
+            <div class="form-group">
+              <label>URL</label>
+              <input id="edit-svc-url" type="url" required>
+            </div>
+            <div class="form-group">
+              <label>Icon (emoji)</label>
+              <input id="edit-svc-icon" type="text" maxlength="4">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Category</label>
+              <select id="edit-svc-cat" class="cat-select">
+                <option value="">— none —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Accent Colour</label>
+              <input id="edit-svc-accent" type="color">
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <div class="checkbox-row">
+                <input id="edit-svc-auth" type="checkbox">
+                <label for="edit-svc-auth">Requires auth</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="flex:1 1 100%">
+              <label>Description</label>
+              <textarea id="edit-svc-desc" rows="2" placeholder="Brief description of this service"></textarea>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Host name (offline detection)</label>
+              <select id="edit-svc-host-name">
+                <option value="">-- None (always online) --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <div class="checkbox-row">
+                <input id="edit-svc-disable-offline" type="checkbox">
+                <label for="edit-svc-disable-offline">Disable card if host offline</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="button" id="cancel-edit-svc" class="btn btn-secondary">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="admin-card section-gap">
+        <div class="admin-card-title">All Services</div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:30px"></th>
+              <th style="width:40px">Icon</th>
+              <th>Name</th>
+              <th>URL</th>
+              <th>Category</th>
+              <th style="width:50px">Colour</th>
+              <th style="width:60px">Auth</th>
+              <th style="width:120px"></th>
+            </tr>
+          </thead>
+          <tbody id="svc-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- ── Categories (merged into Services panel) ─────────────────────── -->
+      <div class="admin-card section-gap" style="border-top: 2px solid rgba(0,229,255,0.12); padding-top: 1.5rem;">
+        <div class="admin-card-title">CATEGORIES</div>
+        <div class="metrics-sub-desc">Manage service categories. Drag to reorder.</div>
+
+        <form id="add-cat-form" style="margin-top:1rem">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Name</label>
+              <input id="new-cat-name" type="text" placeholder="MEDIA" required>
+            </div>
+            <div class="form-group">
+              <label>Colour</label>
+              <input id="new-cat-colour" type="color" value="#00e5ff">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Add Category</button>
+          </div>
+        </form>
+
+        <!-- Edit category form -->
+        <div id="edit-cat-form" style="display:none;border:1px solid rgba(0,229,255,0.3);border-radius:8px;padding:1rem;margin-top:1rem">
+          <div class="admin-card-title">Edit Category</div>
+          <form>
+            <input type="hidden" id="edit-cat-id">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Name</label>
+                <input id="edit-cat-name" type="text" required>
+              </div>
+              <div class="form-group">
+                <label>Colour</label>
+                <input id="edit-cat-colour" type="color">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+              <button type="button" id="cancel-edit-cat" class="btn btn-secondary">Cancel</button>
+            </div>
+          </form>
+        </div>
+
+        <div style="margin-top:1rem">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:30px"></th>
+                <th>Name</th>
+                <th>Colour</th>
+                <th style="width:140px"></th>
+              </tr>
+            </thead>
+            <tbody id="cat-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div id="panel-settings" class="panel">
+      <div class="panel-title">SETTINGS</div>
+      <div class="panel-desc">Site-wide configuration.</div>
+
+      <!-- ── 1. LAYOUT ───────────────────────────────────────────────────── -->
+      <div class="admin-card">
+        <div class="admin-card-title">LAYOUT</div>
+        <form id="hero-form">
+
+          <div class="metrics-sub-title">Site Identity</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Site Title</label>
+              <input id="set-title" type="text" placeholder="The Firmament">
+            </div>
+            <div class="form-group">
+              <label>Tagline</label>
+              <input id="set-tagline" type="text" placeholder="Guardian of the Threshold">
+            </div>
+          </div>
+
+          <div class="metrics-sub-title" style="margin-top:1.5rem">Hero</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Hero Title</label>
+              <input type="text" id="hero-title" placeholder="THE FIRMAMENT" maxlength="64">
+            </div>
+            <div class="form-group">
+              <label>Hero Subtitle</label>
+              <input type="text" id="hero-subtitle" placeholder="SCHROTH.CA HOMELAB" maxlength="80">
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <div class="checkbox-row">
+                <input type="checkbox" id="hero-scroll-indicator" checked>
+                <label for="hero-scroll-indicator">Show Scroll Indicator</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="metrics-sub-title" style="margin-top:1.5rem">Cards</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Card Style</label>
+              <select id="layout-card-style">
+                <option value="glass">Glass (glassmorphism)</option>
+                <option value="solid">Solid</option>
+                <option value="minimal">Minimal (border only)</option>
+                <option value="bordered">Bordered</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Card min-width — desktop (px)</label>
+              <input id="set-card-width-desktop" type="number" min="100" max="600" placeholder="200">
+            </div>
+            <div class="form-group">
+              <label>Card columns — mobile</label>
+              <input id="set-card-width-mobile" type="number" min="1" max="4" placeholder="1">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Desktop Columns</label>
+              <select id="layout-desktop-columns">
+                <option value="auto">Auto</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <div class="checkbox-list">
+                <label class="checkbox-item"><input type="checkbox" id="layout-show-descriptions" checked> Show Descriptions</label>
+                <label class="checkbox-item"><input type="checkbox" id="layout-show-urls" checked> Show URLs</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="metrics-sub-title" style="margin-top:1.5rem">Footer</div>
+          <div class="form-row">
+            <div class="form-group" style="flex:2 1 220px">
+              <label>Footer Text</label>
+              <input type="text" id="footer-text-input" placeholder="PERSONAL NON-COMMERCIAL USE ONLY" maxlength="120">
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <div class="checkbox-row">
+                <input type="checkbox" id="footer-show-link" checked>
+                <label for="footer-show-link">Show Personal Link</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Personal Link URL</label>
+              <input type="text" id="footer-link-url" placeholder="https://linkstack.schroth.ca/@brad">
+            </div>
+            <div class="form-group">
+              <label>Personal Link Label</label>
+              <input type="text" id="footer-link-label" placeholder="Brad Schroth" maxlength="64">
+            </div>
+          </div>
+
+          <div class="metrics-sub-title" style="margin-top:1.5rem">Announcement Banner</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <div class="checkbox-list">
+                <label class="checkbox-item"><input type="checkbox" id="announce-enabled"> Enable Banner</label>
+                <label class="checkbox-item"><input type="checkbox" id="announce-dismissible" checked> Dismissible</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Banner Colour</label>
+              <input type="color" id="announce-colour" value="#fbbf24">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="flex:1 1 100%">
+              <label>Banner Text</label>
+              <textarea id="announce-text" rows="2" placeholder="System maintenance scheduled for Sunday 2am–4am UTC"></textarea>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Layout</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ── 2. SIDE PANEL ──────────────────────────────────────────────── -->
+      <div class="admin-card section-gap">
+        <div class="admin-card-title">SIDE PANEL</div>
+        <form id="character-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <div class="checkbox-row">
+                <input type="checkbox" id="char-enabled" checked>
+                <label for="char-enabled">Enable Side Panel</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Panel Side</label>
+              <div style="display:flex;gap:1.25rem;margin-top:0.25rem">
+                <label class="checkbox-item"><input type="radio" name="char-side" id="char-side-right" value="right" checked> Right</label>
+                <label class="checkbox-item"><input type="radio" name="char-side" id="char-side-left"  value="left"> Left</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Character Name</label>
+              <input type="text" id="char-name" placeholder="ENGEL" maxlength="32">
+            </div>
+            <div class="form-group">
+              <label>Character Tagline</label>
+              <input type="text" id="char-tagline" placeholder="GUARDIAN OF THE FIRMAMENT" maxlength="64">
+            </div>
+            <div class="form-group">
+              <label>Panel Width (px)</label>
+              <input type="number" id="char-panel-width" min="200" max="500" placeholder="300">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Blend Mode</label>
+              <select id="char-blend-mode">
+                <option value="screen">Screen (default)</option>
+                <option value="lighten">Lighten</option>
+                <option value="normal">Normal</option>
+                <option value="multiply">Multiply</option>
+                <option value="overlay">Overlay</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <div class="checkbox-list">
+                <label class="checkbox-item"><input type="checkbox" id="char-show-status" checked> Show Status Line</label>
+                <label class="checkbox-item"><input type="checkbox" id="char-show-metrics" checked> Show Metrics</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Side Panel Settings</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ── 3. WELCOME MESSAGE ─────────────────────────────────────────── -->
+      <div class="admin-card section-gap">
+        <div class="admin-card-title">WELCOME MESSAGE</div>
+        <form id="welcome-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <div class="checkbox-list">
+                <label class="checkbox-item"><input type="checkbox" id="welcome-enabled"> Enable Welcome Modal</label>
+                <label class="checkbox-item"><input type="checkbox" id="welcome-once" checked> Show Once Per Session</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Button Label</label>
+              <input type="text" id="welcome-button" placeholder="ENTER" maxlength="32">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Modal Title</label>
+              <input type="text" id="welcome-title" placeholder="WELCOME TO THE FIRMAMENT" maxlength="80">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="flex:1 1 100%">
+              <label>Modal Body</label>
+              <textarea id="welcome-body" rows="3" placeholder="This is a personal homelab portal..."></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Welcome Settings</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ── 4. APPEARANCE ──────────────────────────────────────────────── -->
+      <div class="admin-card section-gap">
+        <div class="admin-card-title">APPEARANCE</div>
+        <form id="appearance-form">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Theme Preset</label>
+              <select id="theme-preset">
+                <option value="firmament-dark">FIRMAMENT DARK</option>
+                <option value="firmament-light">FIRMAMENT LIGHT</option>
+                <option value="ember">EMBER</option>
+                <option value="verdant">VERDANT</option>
+                <option value="seraph">SERAPH</option>
+                <option value="custom">CUSTOM</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="theme-preview-wrap" style="margin:1rem 0;padding:1rem;border:1px solid var(--border);border-radius:8px;background:rgba(0,0,0,0.2)">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.55rem;letter-spacing:0.2em;color:var(--text-dim);text-transform:uppercase;margin-bottom:0.75rem">Live Preview</div>
+            <div id="theme-preview" style="padding:1rem;border-radius:8px">
+              <div style="display:flex;gap:0.75rem;align-items:stretch;margin-bottom:0.5rem">
+                <div id="tp-bg-swatch" style="width:48px;height:48px;border-radius:6px;flex-shrink:0;border:1px solid rgba(255,255,255,0.1)"></div>
+                <div id="tp-card" style="flex:1;padding:0.6rem 0.75rem;border-radius:6px;border:1px solid rgba(255,255,255,0.1)">
+                  <div id="tp-name"  style="font-size:0.8rem;margin-bottom:0.2rem">Service Name</div>
+                  <div id="tp-url"   style="font-size:0.6rem">service.example.com</div>
+                  <div id="tp-desc"  style="font-size:0.65rem;margin-top:0.15rem">Brief description</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:1rem">
+                <span id="tp-accent" style="font-size:0.78rem">Accent</span>
+                <span id="tp-text"   style="font-size:0.78rem">Primary text</span>
+                <span id="tp-dim"    style="font-size:0.78rem">Dimmed text</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="metrics-sub-title">Colours</div>
+          <div class="metrics-sub-desc">Select CUSTOM preset to edit individual colours.</div>
+          <div class="theme-colours-grid">
+            <div class="theme-colour-row"><label class="colour-field-label">Primary Accent</label>
+              <input type="color" class="theme-colour-picker" id="tc-accent-primary">
+              <input type="text" class="theme-colour-hex" id="th-accent-primary" maxlength="7" placeholder="#00e5ff">
+            </div>
+            <div class="theme-colour-row"><label class="colour-field-label">Secondary Accent</label>
+              <input type="color" class="theme-colour-picker" id="tc-accent-secondary">
+              <input type="text" class="theme-colour-hex" id="th-accent-secondary" maxlength="7" placeholder="#8b5cf6">
+            </div>
+            <div class="theme-colour-row"><label class="colour-field-label">Background Primary</label>
+              <input type="color" class="theme-colour-picker" id="tc-bg-primary">
+              <input type="text" class="theme-colour-hex" id="th-bg-primary" maxlength="7" placeholder="#04080f">
+            </div>
+            <div class="theme-colour-row"><label class="colour-field-label">Background Secondary</label>
+              <input type="color" class="theme-colour-picker" id="tc-bg-secondary">
+              <input type="text" class="theme-colour-hex" id="th-bg-secondary" maxlength="7" placeholder="#060d18">
+            </div>
+            <div class="theme-colour-row"><label class="colour-field-label">Text Primary</label>
+              <input type="color" class="theme-colour-picker" id="tc-text-primary">
+              <input type="text" class="theme-colour-hex" id="th-text-primary" maxlength="7" placeholder="#c9d6e3">
+            </div>
+            <div class="theme-colour-row"><label class="colour-field-label">Text Dimmed</label>
+              <input type="color" class="theme-colour-picker" id="tc-text-dim">
+              <input type="text" class="theme-colour-hex" id="th-text-dim" maxlength="7" placeholder="#5a7a99">
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-top:1rem">
+            <div class="form-group">
+              <label>Card Opacity — <span id="card-opacity-val">0.85</span></label>
+              <input type="range" id="theme-card-opacity" min="0.5" max="1.0" step="0.01" value="0.85">
+            </div>
+          </div>
+
+          <div class="metrics-sub-title" style="margin-top:1.5rem">Effects</div>
+          <div class="form-row">
+            <div class="form-group">
+              <div class="checkbox-row">
+                <input type="checkbox" id="theme-scanlines" checked>
+                <label for="theme-scanlines">Scanlines</label>
+              </div>
+              <label style="margin-top:0.75rem">Intensity — <span id="scanline-intensity-val">0.012</span></label>
+              <input type="range" id="theme-scanline-intensity" min="0" max="0.05" step="0.001" value="0.012" style="margin-top:0.25rem">
+            </div>
+            <div class="form-group">
+              <div class="checkbox-row">
+                <input type="checkbox" id="theme-corner-brackets" checked>
+                <label for="theme-corner-brackets">Corner Brackets</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="metrics-sub-title" style="margin-top:1.5rem">Fonts</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Heading Font</label>
+              <select id="theme-font-heading">
+                <option>Orbitron</option><option>Rajdhani</option><option>Exo 2</option>
+                <option>Audiowide</option><option>Michroma</option><option>Quantico</option>
+                <option>Share Tech</option><option>Inter</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Body Font</label>
+              <select id="theme-font-body">
+                <option>Rajdhani</option><option>Inter</option><option>Exo 2</option>
+                <option>Source Sans 3</option><option>DM Sans</option>
+                <option>Nunito</option><option>Open Sans</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Mono Font</label>
+              <select id="theme-font-mono">
+                <option>Share Tech Mono</option><option>JetBrains Mono</option>
+                <option>Fira Code</option><option>Space Mono</option><option>Courier Prime</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="metrics-sub-title" style="margin-top:1.25rem">Custom Fonts</div>
+          <div class="metrics-sub-desc">Upload .woff2, .woff, or .ttf (max 5 MB). Overrides the dropdown selection for that slot.</div>
+          <div id="font-upload-list"></div>
+
+          <div class="metrics-sub-title" style="margin-top:1.5rem">Favicon</div>
+          <div id="favicon-section"></div>
+
+          <div class="metrics-sub-title" style="margin-top:1.5rem">Custom CSS</div>
+          <div class="metrics-sub-desc">Applied after all theme styles. Script tags and @import are stripped.</div>
+          <textarea id="theme-custom-css" rows="8" placeholder="/* Add custom CSS here */"
+            style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:0.72rem;padding:0.75rem;resize:vertical;outline:none;margin-top:0.25rem"></textarea>
+
+          <div class="form-actions" style="margin-top:1.5rem">
+            <button type="submit" class="btn btn-primary">Save Appearance</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ── 5. MEDIA ───────────────────────────────────────────────────── -->
+      <div class="admin-card section-gap">
+        <div class="admin-card-title">MEDIA</div>
+        <div class="metrics-sub-desc">Upload video files for the portal experience. Max 100 MB each. Accepted: .mp4, .webm.</div>
+        <div id="media-upload-list"></div>
+      </div>
+
+      <!-- ── 6. INFLUXDB CONNECTION ─────────────────────────────────────── -->
+      <div class="admin-card section-gap">
+        <div class="admin-card-title">InfluxDB Connection</div>
+        <form id="metrics-settings-form">
+          <div class="form-row">
+            <div class="form-group" style="flex:2 1 260px">
+              <label>InfluxDB URL</label>
+              <input id="set-influx-url" type="text" placeholder="http://192.168.1.182:8086">
+            </div>
+            <div class="form-group" style="flex:3 1 320px">
+              <label>Token</label>
+              <input id="set-influx-token" type="password" placeholder="your-influxdb-token" autocomplete="off">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Organisation</label>
+              <input id="set-influx-org" type="text" placeholder="proxmox">
+            </div>
+            <div class="form-group">
+              <label>Bucket</label>
+              <input id="set-influx-bucket" type="text" placeholder="proxmox">
+            </div>
+            <div class="form-group">
+              <label>Refresh Interval (s)</label>
+              <input id="set-influx-interval" type="number" min="10" max="3600" placeholder="30">
+            </div>
+          </div>
+
+          <div class="metrics-sub-title">Proxmox Nodes</div>
+          <div class="metrics-sub-desc">Each node listed here is treated as a Proxmox hypervisor. Display names apply in the panel and live metrics. Per-node thresholds control when SYSTEMS DEGRADED is triggered.</div>
+          <div id="node-mappings-list"></div>
+          <div style="margin-top:0.75rem">
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-node">+ Add Node</button>
+          </div>
+
+          <div class="metrics-sub-title" style="margin-top:1.5rem">Status Configuration</div>
+          <div class="metrics-sub-desc">Which nodes and metrics can trigger SYSTEMS DEGRADED.</div>
+          <div class="form-row" style="margin-top:0.75rem">
+            <div class="form-group">
+              <label>Nodes to watch</label>
+              <div id="status-watch-nodes" class="checkbox-list"></div>
+            </div>
+            <div class="form-group">
+              <label>Metrics to watch</label>
+              <div class="checkbox-list">
+                <label class="checkbox-item"><input type="checkbox" id="watch-cpu"  value="cpu">  CPU usage</label>
+                <label class="checkbox-item"><input type="checkbox" id="watch-ram"  value="ram">  RAM usage</label>
+                <label class="checkbox-item"><input type="checkbox" id="watch-disk" value="disk"> Disk usage</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Availability</label>
+              <div class="checkbox-list">
+                <label class="checkbox-item"><input type="checkbox" id="watch-offline"> Alert if node offline</label>
+              </div>
+            </div>
+            <div class="form-group" id="status-borg-group">
+              <label>Backup repositories</label>
+              <div id="status-watch-borg" class="checkbox-list"></div>
+              <div id="status-borg-note" class="metrics-sub-desc" style="margin-top:0.4rem;display:none"></div>
+            </div>
+          </div>
+
+          <div class="metrics-sub-title" style="margin-top:1.5rem">Right Panel Display</div>
+          <div class="metrics-sub-desc">What appears in the ENGEL panel on the public page.</div>
+          <div class="form-row" style="margin-top:0.75rem">
+            <div class="form-group">
+              <label>Nodes to show</label>
+              <div id="panel-show-nodes" class="checkbox-list"></div>
+            </div>
+            <div class="form-group">
+              <label>Metrics to show</label>
+              <div class="checkbox-list">
+                <label class="checkbox-item"><input type="checkbox" id="panel-show-cpu"     value="cpu">     CPU</label>
+                <label class="checkbox-item"><input type="checkbox" id="panel-show-ram"     value="ram">     RAM</label>
+                <label class="checkbox-item"><input type="checkbox" id="panel-show-disk"    value="disk">    Disk</label>
+                <label class="checkbox-item"><input type="checkbox" id="panel-show-uptime"  value="uptime">  Uptime</label>
+                <label class="checkbox-item"><input type="checkbox" id="panel-show-loadavg" value="loadavg"> Load Avg</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Backup to show</label>
+              <div id="panel-show-borg" class="checkbox-list"></div>
+            </div>
+          </div>
+
+          <div class="metrics-sub-title" style="margin-top:1.5rem">Field Overrides</div>
+          <div class="metrics-sub-desc">Override display behaviour for a specific host and field.</div>
+          <div id="overrides-list"></div>
+          <div style="margin-top:0.75rem">
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-override">+ Add Override</button>
+          </div>
+
+          <div class="form-actions" style="margin-top:1.75rem">
+            <button type="submit" class="btn btn-primary">Save Metrics Settings</button>
+          </div>
+        </form>
+
+        <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem">
+          <div class="admin-card-title">Test Connection</div>
+          <div style="margin-bottom:0.75rem">
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-test-influx">Test Connection</button>
+          </div>
+          <textarea id="influx-test-result" rows="10" readonly
+            style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:0.72rem;padding:0.75rem;resize:vertical;outline:none"
+            placeholder="Result will appear here..."></textarea>
+        </div>
+      </div>
+
+      <!-- ── 7. BACKUP METRICS (BORG-UI) ───────────────────────────────── -->
+      <div class="admin-card section-gap">
+        <div class="admin-card-title">Backup Metrics (Borg-UI)</div>
+        <form id="borg-settings-form">
+          <div class="form-row">
+            <div class="form-group" style="flex:2 1 260px">
+              <label>Borg-UI URL</label>
+              <input id="set-borg-url" type="text" placeholder="http://192.168.1.6:8082">
+            </div>
+            <div class="form-group" style="flex:3 1 320px">
+              <label>Metrics Token</label>
+              <input id="set-borg-token" type="password" placeholder="your-borg-metrics-token" autocomplete="off">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Refresh Interval (s)</label>
+              <input id="set-borg-interval" type="number" min="30" max="3600" placeholder="60">
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <div class="checkbox-row">
+                <input id="set-borg-enabled" type="checkbox" checked>
+                <label for="set-borg-enabled">Enabled</label>
+              </div>
+            </div>
+          </div>
+          <div class="metrics-sub-title" style="margin-top:1.25rem">Repository Display Names</div>
+          <div class="metrics-sub-desc">Custom names shown in the panel and live metrics for each repository.</div>
+          <div id="borg-repo-names-list" style="margin-top:0.5rem"></div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Backup Settings</button>
+          </div>
+        </form>
+
+        <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem">
+          <div class="admin-card-title">Test Connection</div>
+          <div style="margin-bottom:0.75rem">
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-test-borg">Test Connection</button>
+          </div>
+          <textarea id="borg-test-result" rows="10" readonly
+            style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:0.72rem;padding:0.75rem;resize:vertical;outline:none"
+            placeholder="Result will appear here..."></textarea>
+        </div>
+      </div>
+
+      <!-- ── 8. EXPORT / IMPORT ─────────────────────────────────────────── -->
+      <div class="admin-card section-gap">
+        <div class="admin-card-title">EXPORT / IMPORT</div>
+        <div class="metrics-sub-desc">Export all settings to a JSON file, or import from a previously exported file. Tokens (InfluxDB, Borg) are never exported or imported.</div>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;margin-top:1rem">
+          <a id="btn-export-settings" href="/api/admin/settings/export" class="btn btn-secondary">Export Settings</a>
+          <button type="button" class="btn btn-secondary" id="btn-import-settings">Import Settings…</button>
+          <input type="file" id="import-file-input" accept=".json" style="display:none">
+        </div>
+        <div class="metrics-sub-desc" style="margin-top:0.75rem;color:#fb923c">Warning: import overwrites all current settings except tokens. Videos and fonts are not included.</div>
+      </div>
+
+    </div>
+
+    <!-- Live Metrics Panel -->
+    <div id="panel-live-metrics" class="panel">
+      <div class="panel-title">LIVE METRICS</div>
+      <div class="panel-desc">Real-time infrastructure status. Refreshes every 30 seconds.</div>
+
+      <div class="admin-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem">
+          <div id="metrics-status-badge" class="metrics-badge dim">LOADING</div>
+          <div class="metrics-section-toggles">
+            <span class="section-toggle-label">SHOW</span>
+            <label class="section-toggle"><input type="checkbox" id="toggle-nodes" checked><span>Nodes</span></label>
+            <label class="section-toggle"><input type="checkbox" id="toggle-containers" checked><span>Containers</span></label>
+            <label class="section-toggle"><input type="checkbox" id="toggle-storages" checked><span>Storages</span></label>
+            <label class="section-toggle"><input type="checkbox" id="toggle-backup" checked><span>Backup</span></label>
+          </div>
+        </div>
+
+        <div id="metrics-section-nodes" style="margin-top:1.75rem">
+          <div class="metrics-table-header cyan">PROXMOX NODES</div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Node</th><th>CPU %</th><th>RAM %</th><th>Disk %</th><th>Uptime</th><th>Load</th>
+              </tr>
+            </thead>
+            <tbody id="metrics-nodes-tbody"></tbody>
+          </table>
+        </div>
+
+        <div id="metrics-section-containers" style="margin-top:2rem">
+          <div class="metrics-table-header purple">CONTAINERS &amp; VMs</div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th><th>Type</th><th>CPU %</th><th>RAM %</th><th>Disk %</th><th>Uptime</th>
+              </tr>
+            </thead>
+            <tbody id="metrics-containers-tbody"></tbody>
+          </table>
+        </div>
+
+        <div id="metrics-section-storages" style="margin-top:2rem">
+          <div class="metrics-table-header orange">STORAGES</div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Storage</th><th>Node</th><th>Used</th><th>Total</th><th>Disk %</th>
+              </tr>
+            </thead>
+            <tbody id="metrics-storages-tbody"></tbody>
+          </table>
+        </div>
+
+        <div id="metrics-section-backup" style="margin-top:2rem">
+          <div class="borg-section-header">
+            <div class="metrics-table-header borg-header-text">BACKUP STATUS</div>
+            <span id="borg-status-badge" class="borg-status-badge dim">LOADING</span>
+          </div>
+          <div id="borg-repos-container" style="margin-top:1rem"></div>
+        </div>
+
+        <div style="margin-top:1rem;display:flex;justify-content:flex-end">
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-refresh-metrics">Refresh Now</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Video Preview Modal -->
+  <div id="video-preview-modal" style="display:none">
+    <div class="modal-backdrop" onclick="closeVideoPreview()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <span id="video-preview-title" style="font-family:'Orbitron',sans-serif;font-size:0.7rem;letter-spacing:0.2em;color:var(--cyan);text-transform:uppercase">Preview</span>
+        <button onclick="closeVideoPreview()" style="background:none;border:none;color:var(--text-dim);font-size:1.2rem;cursor:pointer;padding:0.25rem">&#x2715;</button>
+      </div>
+      <video id="video-preview-player" controls muted playsinline style="width:100%;max-height:70vh;background:#000;border-radius:4px"></video>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>
