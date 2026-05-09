@@ -73,16 +73,6 @@ via the admin panel.
 ### Layout Settings
 ![Admin Layout](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-layout.png)
 
-## Sections Without Screenshots Yet
-
-The following admin sections could use screenshots:
-- Appearance / Theme presets
-- Character / Side panel settings
-- Welcome message modal
-- Media / Video upload
-- InfluxDB connection and metrics config
-- Borg-UI backup metrics
-
 ## Character Videos
 
 This repo does not include character videos.
