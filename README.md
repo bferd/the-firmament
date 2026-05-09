@@ -4,7 +4,7 @@ A self-hosted homelab portal with an AI guardian
 character, live infrastructure metrics, and a 
 fully configurable admin panel.
 
-![The Firmament](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview.png)
+![Hero](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-hero.png)
 
 ## Features
 
@@ -37,7 +37,9 @@ docker compose up -d --build
 
 Then visit `http://your-server-ip:3000`
 
-## Configuration
+## Services Dashboard
+
+![Services](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-services.png)
 
 All configuration is done through the admin 
 panel at `/admin` — protected by Authelia.
@@ -45,6 +47,41 @@ panel at `/admin` — protected by Authelia.
 Configure services, categories, theme, 
 metrics, backup status, and more without 
 touching any code.
+
+## Mobile
+
+![Mobile Hero](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_hero.png)
+
+![Mobile Full Page](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_fullpage.png)
+
+The portal is fully responsive. On mobile 
+the hero works as on desktop. The services 
+section shows one card per row. The side 
+panel can be shown or hidden on mobile 
+via the admin panel.
+
+## Admin Panel
+
+### Live Metrics
+![Admin Live Metrics](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-metrics.png)
+
+### Services & Categories
+![Admin Add Service](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-add_service.png)
+
+![Admin Categories](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-categories.png)
+
+### Layout Settings
+![Admin Layout](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-layout.png)
+
+## Sections Without Screenshots Yet
+
+The following admin sections could use screenshots:
+- Appearance / Theme presets
+- Character / Side panel settings
+- Welcome message modal
+- Media / Video upload
+- InfluxDB connection and metrics config
+- Borg-UI backup metrics
 
 ## Character Videos
 
@@ -67,18 +104,10 @@ the `/videos` directory:
 - InfluxDB v2 with Proxmox metrics (optional)
 - Borg-UI (optional)
 
-## License
-
-MIT — see LICENSE file.
-
-## Credits
-
-Created by Brad Schroth
-schroth.ca
-
 ## Docker Compose Configuration
 
-Before running, edit `docker-compose.yml` and update these values for your setup:
+Before running, edit `docker-compose.yml` and 
+update these values for your setup:
 
 ```yaml
 ports:
@@ -97,15 +126,15 @@ Generate a secure random secret:
 openssl rand -hex 32
 ```
 
-Use the same value in both `docker-compose.yml` and your NPMplus proxy 
-Advanced config:
+Use the same value in both `docker-compose.yml` 
+and your reverse proxy Advanced config:
 ```nginx
 proxy_set_header X-Proxy-Secret your-secret-here;
 ```
 
 ### Volumes
 
-The compose file expects these directories to exist on the host:
+The compose file expects these directories:
 - `./data/` — SQLite database (created automatically)
 - `./videos/` — Character and background videos (add your own)
 - `./fonts/` — Custom uploaded fonts (created automatically)
@@ -113,5 +142,15 @@ The compose file expects these directories to exist on the host:
 
 ### Ports
 
-The app runs on port 3000 internally. Bind it to your server IP 
-rather than 0.0.0.0 to avoid exposing it beyond your local network.
+The app runs on port 3000 internally. Bind it 
+to your server IP rather than 0.0.0.0 to avoid 
+exposing it beyond your local network.
+
+## License
+
+MIT — see LICENSE file.
+
+## Credits
+
+Created by Brad Schroth
+schroth.ca
