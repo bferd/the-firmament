@@ -50,9 +50,9 @@ touching any code.
 
 ## Mobile
 
-![Mobile Hero](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_hero.png)
+![Mobile Hero](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_hero.jpg)
 
-![Mobile Full Page](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_fullpage.png)
+![Mobile Full Page](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_fullpage.jpg)
 
 The portal is fully responsive. On mobile 
 the hero works as on desktop. The services 
@@ -100,7 +100,8 @@ the `/videos` directory:
 
 - Docker + Docker Compose
 - Authelia (for admin auth)
-- NPM, NPMplus, or nginx reverse proxy
+- NPMplus (recommended — has built-in Authelia integration)
+- NPM or nginx (supported but requires manual Authelia auth_request configuration)
 - InfluxDB v2 with Proxmox metrics (optional)
 - Borg-UI (optional)
 
