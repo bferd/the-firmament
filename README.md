@@ -145,5 +145,4 @@ MIT — see LICENSE file.
 
 ## Credits
 
-Created by Brad Schroth
-schroth.ca
+Created by [Brad Schroth](https://linkstack.schroth.ca/@brad) — [schroth.ca](https://schroth.ca)
