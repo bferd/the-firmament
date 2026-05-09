@@ -858,7 +858,7 @@ async function bootFast() {
 
 // ── Mobile panel visibility ───────────────────────────────────────────────
 function applyMobilePanelVisibility(setting) {
-  const nowMobile   = window.innerWidth <= 768;
+  const nowMobile   = Math.min(window.innerWidth, window.innerHeight) <= 768;
   const panel       = document.getElementById('engel-panel');
   const services    = document.getElementById('services');
   const mobileStatus = document.getElementById('mobile-status');
