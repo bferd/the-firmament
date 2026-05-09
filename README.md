@@ -50,9 +50,9 @@ touching any code.
 
 ## Mobile
 
-![Mobile Hero](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_hero.jpg)
+<img src="https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_hero.jpg" width="300" alt="Mobile Hero">
 
-![Mobile Full Page](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_fullpage.jpg)
+<img src="https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_fullpage.jpg" width="300" alt="Mobile Full Page">
 
 The portal is fully responsive. On mobile 
 the hero works as on desktop. The services 
