@@ -63,7 +63,7 @@ the `/videos` directory:
 
 - Docker + Docker Compose
 - Authelia (for admin auth)
-- NPM, NPMplus or nginx reverse proxy
+- NPM, NPMplus, or nginx reverse proxy
 - InfluxDB v2 with Proxmox metrics (optional)
 - Borg-UI (optional)
 
@@ -75,3 +75,43 @@ MIT — see LICENSE file.
 
 Created by Brad Schroth
 schroth.ca
+
+## Docker Compose Configuration
+
+Before running, edit `docker-compose.yml` and update these values for your setup:
+
+```yaml
+ports:
+  - "YOUR_SERVER_IP:3000:3000"  # Change to your server IP
+
+environment:
+  - AUTHELIA_URL=http://YOUR_AUTHELIA_IP:9091  # Your Authelia instance
+  - NPMPLUS_IP=YOUR_NPMPLUS_IP                 # Your reverse proxy IP
+  - PROXY_SECRET=your-random-secret-here       # Generate a random string
+```
+
+### PROXY_SECRET
+
+Generate a secure random secret:
+```bash
+openssl rand -hex 32
+```
+
+Use the same value in both `docker-compose.yml` and your NPMplus proxy 
+Advanced config:
+```nginx
+proxy_set_header X-Proxy-Secret your-secret-here;
+```
+
+### Volumes
+
+The compose file expects these directories to exist on the host:
+- `./data/` — SQLite database (created automatically)
+- `./videos/` — Character and background videos (add your own)
+- `./fonts/` — Custom uploaded fonts (created automatically)
+- `./public/` — Static assets
+
+### Ports
+
+The app runs on port 3000 internally. Bind it to your server IP 
+rather than 0.0.0.0 to avoid exposing it beyond your local network.
