@@ -872,6 +872,10 @@ body::before {
 
   #main-content.panel-open { padding-right: var(--gutter); }
 
+  /* applyTheme() sets --panel-w via inline style on :root which beats the CSS var
+     above — override margin-right directly so services always fill mobile width */
+  #services { margin-right: 0 !important; }
+
   #hero-video-slot video { height: 50vh; }
   .hero-title { font-size: 2rem; letter-spacing: 0.2em; }
 
@@ -1122,4 +1126,30 @@ body.panel-left #engel-panel.visible {
 body.panel-left #main-content.panel-open {
   padding-right: var(--gutter);
   padding-left: calc(var(--panel-w) + var(--gutter));
+}
+
+/* ── Mobile status bar (shown when side panel is hidden on mobile) ─────────── */
+#mobile-status {
+  display: none;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(var(--cyan-rgb, 0, 229, 255), 0.15);
+  margin-bottom: 0.5rem;
+}
+
+#mobile-status-dot {
+  margin-right: 0.4rem;
+  color: #00ff88;
+}
+
+#mobile-status-dot.degraded {
+  color: #ff4444;
+  animation: pulse 1.5s infinite;
+}
+
+#mobile-status-text {
+  color: var(--text-dim);
 }

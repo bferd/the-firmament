@@ -14,6 +14,7 @@ const isMobile         = window.innerWidth <= 768;
 
 // ── State ─────────────────────────────────────────────────────────────────
 let state             = 'hero';
+let mobilePanelSetting = 'hidden';
 let authenticated     = false;
 let scrollAccum       = 0;
 let heroInView        = false;
@@ -634,6 +635,20 @@ function applyOfflineStates() {
 }
 
 function updatePanelMetrics(data) {
+  // Sync mobile status bar regardless of panel visibility
+  const mobileStatusDot  = document.getElementById('mobile-status-dot');
+  const mobileStatusText = document.getElementById('mobile-status-text');
+  if (mobileStatusDot && mobileStatusText) {
+    if (!data || data.status === 'unconfigured') {
+      mobileStatusDot.className   = '';
+      mobileStatusText.textContent = 'AWAITING DATA';
+    } else {
+      const isMobileDegraded = data.status === 'degraded';
+      mobileStatusDot.className   = isMobileDegraded ? 'degraded' : '';
+      mobileStatusText.textContent = isMobileDegraded ? 'SYSTEMS DEGRADED' : 'SYSTEMS NOMINAL';
+    }
+  }
+
   const statusDot  = document.getElementById('panel-status-dot');
   const statusText = document.getElementById('panel-status-text');
   const nodesEl    = document.getElementById('panel-metrics-nodes');
@@ -841,6 +856,40 @@ async function bootFast() {
   await checkAuthStatus();
 }
 
+// ── Mobile panel visibility ───────────────────────────────────────────────
+function applyMobilePanelVisibility(setting) {
+  const nowMobile   = window.innerWidth <= 768;
+  const panel       = document.getElementById('engel-panel');
+  const services    = document.getElementById('services');
+  const mobileStatus = document.getElementById('mobile-status');
+
+  if (nowMobile) {
+    const mobilePanel = setting || 'hidden';
+    if (mobilePanel === 'hidden') {
+      if (panel)       panel.style.display       = 'none';
+      if (services) {
+        services.style.marginRight  = '0';
+        services.style.paddingRight = '1rem';
+      }
+      if (mobileStatus) mobileStatus.style.display = 'block';
+    } else {
+      if (panel)       panel.style.display       = '';
+      if (services) {
+        services.style.marginRight  = '';
+        services.style.paddingRight = '';
+      }
+      if (mobileStatus) mobileStatus.style.display = 'none';
+    }
+  } else {
+    if (panel)       panel.style.display       = '';
+    if (mobileStatus) mobileStatus.style.display = 'none';
+  }
+}
+
+window.addEventListener('resize', () => {
+  applyMobilePanelVisibility(mobilePanelSetting);
+});
+
 // ── Layout settings ───────────────────────────────────────────────────────
 async function applyLayoutSettings() {
   try {
@@ -953,6 +1002,9 @@ async function applyTheme() {
     if (metricsWrap) metricsWrap.style.display = theme.character_show_metrics === 'false' ? 'none' : '';
     const statusLine = document.getElementById('panel-status-line');
     if (statusLine) statusLine.style.display = theme.character_show_status === 'false' ? 'none' : '';
+
+    mobilePanelSetting = theme.character_mobile_panel || 'hidden';
+    applyMobilePanelVisibility(mobilePanelSetting);
 
     // Hero text
     const heroTitleEl = document.querySelector('.hero-title');

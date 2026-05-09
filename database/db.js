@@ -148,6 +148,7 @@ for (const [k, v] of [
   ['character_show_metrics',  'true'],
   ['character_show_status',   'true'],
   ['character_panel_side',    'right'],
+  ['character_mobile_panel',  'hidden'],
 
   // Hero & Layout
   ['hero_title',                 'THE FIRMAMENT'],

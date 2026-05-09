@@ -1710,6 +1710,8 @@ function loadCharacterSettings(settings) {
     sideRight.checked = settings.character_panel_side !== 'left';
     sideLeft.checked  = settings.character_panel_side === 'left';
   }
+  const mobileToggle = el('character-mobile-panel-toggle');
+  if (mobileToggle) mobileToggle.checked = settings.character_mobile_panel === 'visible';
 }
 
 function initCharacterForm() {
@@ -1725,6 +1727,7 @@ function initCharacterForm() {
       character_show_status:   document.getElementById('char-show-status')?.checked    ? 'true' : 'false',
       character_show_metrics:  document.getElementById('char-show-metrics')?.checked   ? 'true' : 'false',
       character_panel_side:    side,
+      character_mobile_panel:  document.getElementById('character-mobile-panel-toggle')?.checked ? 'visible' : 'hidden',
     };
     try {
       await api('PUT', '/api/admin/settings', payload);
