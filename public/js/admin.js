@@ -1639,10 +1639,6 @@ function initAppearanceForm() {
       COLOUR_FIELDS.forEach(([fid, key]) => syncColourInputs(fid, data[key] || ''));
       const opEl = document.getElementById('theme-card-opacity');
       if (opEl) { opEl.value = data.theme_card_opacity || '0.85'; document.getElementById('card-opacity-val').textContent = opEl.value; }
-      const scanEl = document.getElementById('theme-scanlines');
-      if (scanEl) scanEl.checked = data.theme_scanlines !== 'false';
-      const siEl = document.getElementById('theme-scanline-intensity');
-      if (siEl) { siEl.value = data.theme_scanline_intensity || '0'; document.getElementById('scanline-intensity-val').textContent = siEl.value; }
     }
     setColourControlsDisabled(this.value !== 'custom');
     updateThemePreview();
@@ -1890,12 +1886,6 @@ async function loadSettings() {
     if (!Array.isArray(currentWatch)) {
       metricsState.statusConfig.watch_borg_repos = [...metricsState.borgRepos];
       api('PUT', '/api/admin/settings', { influxdb_status_config: JSON.stringify(metricsState.statusConfig) }).catch(() => {});
-    } else {
-      const newRepos = metricsState.borgRepos.filter(r => !currentWatch.includes(r));
-      if (newRepos.length > 0) {
-        metricsState.statusConfig.watch_borg_repos = [...currentWatch, ...newRepos];
-        api('PUT', '/api/admin/settings', { influxdb_status_config: JSON.stringify(metricsState.statusConfig) }).catch(() => {});
-      }
     }
   }
 
