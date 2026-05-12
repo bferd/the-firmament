@@ -114,10 +114,10 @@ Generate your own using Higgsfield.ai or
 similar AI video tools and place them in 
 the `/videos` directory:
 
-- `engel-welcome.webm` — plays once on load
-- `engel-idle-loop.webm` — loops on hero
-- `engel-transition.webm` — scroll trigger
-- `engel-browse-idle.webm` — side panel loop
+- `hero-welcome.webm` — plays once on load
+- `hero-idle-loop.webm` — loops on hero
+- `hero-transition.webm` — scroll trigger
+- `hero-browse-idle.webm` — side panel loop
 - `hero-background.mp4` — hero background
 
 ## Requirements
