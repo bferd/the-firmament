@@ -1903,6 +1903,9 @@ async function loadSettings() {
   loadCharacterSettings(settings);
   loadHeroSettings(settings);
   loadWelcomeSettings(settings);
+
+  const noVideosMsgToggle = document.getElementById('show-no-videos-message');
+  if (noVideosMsgToggle) noVideosMsgToggle.checked = settings.show_no_videos_message !== 'false';
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
@@ -1918,6 +1921,13 @@ async function loadSettings() {
     initHeroForm();
     initWelcomeForm();
     initExportImport();
+
+    document.getElementById('show-no-videos-message')?.addEventListener('change', async function () {
+      try {
+        await api('PUT', '/api/admin/settings', { show_no_videos_message: this.checked ? 'true' : 'false' });
+        toast('Media settings saved');
+      } catch (_) { toast('Error saving media settings', 'error'); }
+    });
 
     // Load media sections
     await Promise.all([loadVideos(), loadFonts(), loadFaviconSection()]);

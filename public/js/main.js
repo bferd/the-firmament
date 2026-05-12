@@ -21,6 +21,9 @@ let heroInView        = false;
 let transitionReady   = false;
 let pendingTransition = false;
 let offlineHosts      = new Set();
+let transitionMissing = false;
+let browseIdleMissing = false;
+let theme             = {};
 
 // ── DOM refs ──────────────────────────────────────────────────────────────
 const hero        = document.getElementById('hero');
@@ -41,7 +44,7 @@ const transitionVideo = document.createElement('video');
 transitionVideo.preload     = 'auto';
 transitionVideo.playsInline = true;
 transitionVideo.muted       = true;
-transitionVideo.src         = '/videos/engel-transition.webm';
+transitionVideo.src         = '/videos/hero-transition.webm';
 transitionVideo.style.cssText = 'position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;';
 document.body.appendChild(transitionVideo);
 transitionVideo.load();
@@ -54,12 +57,21 @@ transitionVideo.addEventListener('canplaythrough', () => {
   }
 }, { once: true });
 
+transitionVideo.addEventListener('error', () => {
+  transitionMissing = true;
+  transitionReady   = true;
+  if (pendingTransition) {
+    pendingTransition = false;
+    runTransition();
+  }
+}, { once: true });
+
 // ── Welcome video preloader ───────────────────────────────────────────────
 const welcomePreloader = document.createElement('video');
 welcomePreloader.preload     = 'auto';
 welcomePreloader.playsInline = true;
 welcomePreloader.muted       = true;
-welcomePreloader.src         = '/videos/engel-welcome.webm';
+welcomePreloader.src         = '/videos/hero-welcome.webm';
 welcomePreloader.style.cssText = 'position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;';
 document.body.appendChild(welcomePreloader);
 welcomePreloader.load();
@@ -82,6 +94,21 @@ welcomePreloader.addEventListener('canplaythrough', () => {
   setTimeout(() => {
     if (welcomePreloader.parentNode) welcomePreloader.parentNode.removeChild(welcomePreloader);
   }, 5000);
+}, { once: true });
+
+// ── Browse-idle probe — detects missing file for "all videos absent" check ─
+const browseIdleProbe = document.createElement('video');
+browseIdleProbe.preload     = 'metadata';
+browseIdleProbe.src         = '/videos/hero-browse-idle.webm';
+browseIdleProbe.style.cssText = 'position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;';
+document.body.appendChild(browseIdleProbe);
+browseIdleProbe.load();
+browseIdleProbe.addEventListener('error', () => {
+  browseIdleMissing = true;
+  if (browseIdleProbe.parentNode) browseIdleProbe.parentNode.removeChild(browseIdleProbe);
+}, { once: true });
+browseIdleProbe.addEventListener('loadedmetadata', () => {
+  if (browseIdleProbe.parentNode) browseIdleProbe.parentNode.removeChild(browseIdleProbe);
 }, { once: true });
 
 // ── Hero double-buffer ────────────────────────────────────────────────────
@@ -184,13 +211,30 @@ function triggerTransition() {
   runTransition();
 }
 
+function runFadeTransition() {
+  engelPanel.style.opacity    = '0';
+  engelPanel.style.transition = 'opacity 0.3s ease';
+  engelPanel.classList.add('visible');
+  mainContent.classList.add('panel-open');
+  siteHeader.classList.add('visible');
+  requestAnimationFrame(() => { engelPanel.style.opacity = '1'; });
+  unlockScroll();
+  window.scrollTo({ top: hero.offsetHeight, behavior: 'smooth' });
+  loadServices(false);
+  setTimeout(() => {
+    engelPanel.style.opacity    = '';
+    engelPanel.style.transition = '';
+    enterBrowse();
+  }, 300);
+}
+
 function runMobileTransition() {
   unlockScroll();
   engelPanel.classList.add('visible');
   mainContent.classList.add('panel-open');
   siteHeader.classList.add('visible');
 
-  panelVideo.src           = '/videos/engel-browse-idle.webm';
+  panelVideo.src           = '/videos/hero-browse-idle.webm';
   panelVideo.loop          = true;
   panelVideo.style.opacity = '1';
   panelVideo.load();
@@ -200,6 +244,8 @@ function runMobileTransition() {
 }
 
 function runTransition() {
+  if (transitionMissing) { runFadeTransition(); return; }
+
   const transDuration = transitionVideo.duration
     ? Math.round(transitionVideo.duration * 1000)
     : TRANS_DURATION;
@@ -216,7 +262,7 @@ function runTransition() {
   });
 
   // Pre-load browse-idle hidden — will crossfade in when transition video fades out
-  panelVideo.src          = '/videos/engel-browse-idle.webm';
+  panelVideo.src          = '/videos/hero-browse-idle.webm';
   panelVideo.loop         = true;
   panelVideo.style.opacity = '0';
   panelVideo.load();
@@ -334,13 +380,13 @@ const heroObserver = new IntersectionObserver((entries) => {
       // Restore hero bg video opacity
       heroBgVideo.style.opacity = '1';
       // Restart idle loop in hero
-      crossfadeHeroTo('/videos/engel-idle-loop.webm', true);
+      crossfadeHeroTo('/videos/hero-idle-loop.webm', true);
     } else if (!fullyVisible && heroInView) {
       heroInView = false;
       // Restore panel with browse-idle
       engelPanel.classList.add('visible');
       mainContent.classList.add('panel-open');
-      panelVideo.src           = '/videos/engel-browse-idle.webm';
+      panelVideo.src           = '/videos/hero-browse-idle.webm';
       panelVideo.loop          = true;
       panelVideo.style.opacity = '1';
       panelVideo.load();
@@ -354,6 +400,7 @@ const heroObserver = new IntersectionObserver((entries) => {
 // For looping/unknown-duration videos (bg), canplaythrough is sufficient.
 function waitForVideoReady(video) {
   return new Promise(resolve => {
+    if (video.error) { resolve(); return; }
     const check = () => {
       const dur = video.duration;
       if (!dur || dur === Infinity) { resolve(); return; }
@@ -365,6 +412,7 @@ function waitForVideoReady(video) {
     };
     if (video.readyState >= 4) { check(); } else {
       video.addEventListener('canplaythrough', check, { once: true });
+      video.addEventListener('error', resolve, { once: true });
     }
   });
 }
@@ -458,19 +506,35 @@ async function boot() {
   }
 
   let safetyTimer;
-  let revealDone = false;
+  let revealDone        = false;
+  let errorMessageShown = false;
   let bgError = false, welcomeError = false, idleError = false;
 
   function startVideoSequence() {
     heroBgVideo.play().catch(() => {});
     activeVideo.poster = '';
     activeVideo.play().catch(() => {
-      crossfadeHeroTo('/videos/engel-idle-loop.webm', true);
+      crossfadeHeroTo('/videos/hero-idle-loop.webm', true);
     });
   }
 
+  function showErrorUI() {
+    if (revealDone || errorMessageShown) return;
+    errorMessageShown = true;
+    clearTimeout(safetyTimer);
+    if (theme && theme.show_no_videos_message === 'false') {
+      skipToDashboard();
+    } else {
+      showVideoErrorMessage(mask, skipToDashboard);
+    }
+  }
+
   function revealHero() {
-    if (revealDone) return;
+    if (revealDone || errorMessageShown) return;
+    if (welcomeError && idleError && transitionMissing && browseIdleMissing) {
+      showErrorUI();
+      return;
+    }
     revealDone = true;
     clearTimeout(safetyTimer);
     if (mask) {
@@ -495,7 +559,7 @@ async function boot() {
     mainContent.classList.add('panel-open');
     siteHeader.classList.add('visible');
 
-    panelVideo.src           = '/videos/engel-browse-idle.webm';
+    panelVideo.src           = '/videos/hero-browse-idle.webm';
     panelVideo.loop          = true;
     panelVideo.style.opacity = '1';
     panelVideo.load();
@@ -514,19 +578,8 @@ async function boot() {
   }
 
   function checkVideoErrors() {
-    const anyError   = bgError || welcomeError || idleError;
-    const allErrored = bgError && welcomeError && idleError;
-
-    if (allErrored) {
-      if (revealDone) return;
-      clearTimeout(safetyTimer);
-      showVideoErrorMessage(mask, skipToDashboard);
-      return;
-    }
-
-    if (anyError && !revealDone) {
-      clearTimeout(safetyTimer);
-      safetyTimer = setTimeout(revealHero, 3000);
+    if (welcomeError && idleError && transitionMissing && browseIdleMissing) {
+      showErrorUI();
     }
   }
 
@@ -536,20 +589,24 @@ async function boot() {
   heroBgVideo.load();
 
   // Load idle loop (inactive buffer)
-  inactiveVideo.src  = '/videos/engel-idle-loop.webm';
+  inactiveVideo.src  = '/videos/hero-idle-loop.webm';
   inactiveVideo.loop = true;
   inactiveVideo.load();
 
   // Load welcome video
   if (welcomePosterUrl) activeVideo.poster = welcomePosterUrl;
-  activeVideo.src = '/videos/engel-welcome.webm';
+  activeVideo.src = '/videos/hero-welcome.webm';
   activeVideo.load();
 
   activeVideo.addEventListener('ended', () => {
-    crossfadeHeroTo('/videos/engel-idle-loop.webm', true);
+    crossfadeHeroTo('/videos/hero-idle-loop.webm', true);
   }, { once: true });
 
-  heroBgVideo.addEventListener('error',   () => { bgError      = true; checkVideoErrors(); }, { once: true });
+  heroBgVideo.addEventListener('error', () => {
+    bgError = true;
+    heroBgVideo.style.display = 'none';
+    checkVideoErrors();
+  }, { once: true });
   activeVideo.addEventListener('error',   () => { welcomeError = true; checkVideoErrors(); }, { once: true });
   inactiveVideo.addEventListener('error', () => { idleError    = true; checkVideoErrors(); }, { once: true });
 
@@ -942,7 +999,7 @@ async function bootFast() {
   siteHeader.classList.add('visible');
 
   // Browse-idle panel video
-  panelVideo.src           = '/videos/engel-browse-idle.webm';
+  panelVideo.src           = '/videos/hero-browse-idle.webm';
   panelVideo.loop          = true;
   panelVideo.style.opacity = '1';
   panelVideo.load();
@@ -1064,8 +1121,8 @@ function loadGoogleFont(family) {
 
 async function applyTheme() {
   try {
-    const res   = await fetch('/api/theme');
-    const theme = await res.json();
+    const res = await fetch('/api/theme');
+    theme     = await res.json();
     const root  = document.documentElement;
 
     // Colour vars

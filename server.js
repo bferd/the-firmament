@@ -53,10 +53,10 @@ if (!fs.existsSync(FONTS_DIR)) fs.mkdirSync(FONTS_DIR, { recursive: true });
 // ── Video slot → base filename mapping ────────────────────────────────────
 const VIDEO_SLOTS = {
   background: 'hero-background',
-  welcome:    'engel-welcome',
-  idle:       'engel-idle-loop',
-  transition: 'engel-transition',
-  browse:     'engel-browse-idle',
+  welcome:    'hero-welcome',
+  idle:       'hero-idle-loop',
+  transition: 'hero-transition',
+  browse:     'hero-browse-idle',
 };
 
 // ── Magic byte validators ─────────────────────────────────────────────────
@@ -393,6 +393,7 @@ const THEME_KEYS = [
   'welcome_modal_enabled', 'welcome_modal_title', 'welcome_modal_body',
   'welcome_modal_button', 'welcome_modal_once_per_session',
   'favicon_file', 'title',
+  'show_no_videos_message',
 ];
 
 app.get('/api/theme', (req, res) => {

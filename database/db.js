@@ -177,6 +177,9 @@ for (const [k, v] of [
   ['welcome_modal_body',             'This is a personal homelab portal. Services are for family and friends only.'],
   ['welcome_modal_button',           'ENTER'],
   ['welcome_modal_once_per_session', 'true'],
+
+  // Media behaviour
+  ['show_no_videos_message', 'true'],
 ]) { _ig.run(k, v); }
 
 module.exports = db;
