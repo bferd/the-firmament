@@ -1797,11 +1797,12 @@ function initHeroForm() {
 // ── Welcome modal form ────────────────────────────────────────────────────
 function loadWelcomeSettings(settings) {
   const el = (id) => document.getElementById(id);
-  if (el('welcome-enabled')) el('welcome-enabled').checked = settings.welcome_modal_enabled === 'true';
-  if (el('welcome-once'))    el('welcome-once').checked    = settings.welcome_modal_once_per_session !== 'false';
-  if (el('welcome-title'))   el('welcome-title').value     = settings.welcome_modal_title   || 'WELCOME TO THE FIRMAMENT';
-  if (el('welcome-body'))    el('welcome-body').value      = settings.welcome_modal_body    || '';
-  if (el('welcome-button'))  el('welcome-button').value    = settings.welcome_modal_button  || 'ENTER';
+  if (el('welcome-enabled'))        el('welcome-enabled').checked        = settings.welcome_modal_enabled === 'true';
+  if (el('welcome-once'))           el('welcome-once').checked           = settings.welcome_modal_once_per_session !== 'false';
+  if (el('welcome-title'))          el('welcome-title').value            = settings.welcome_modal_title   || 'WELCOME TO THE FIRMAMENT';
+  if (el('welcome-body'))           el('welcome-body').value             = settings.welcome_modal_body    || '';
+  if (el('welcome-button'))         el('welcome-button').value           = settings.welcome_modal_button  || 'ENTER';
+  if (el('show-no-videos-message')) el('show-no-videos-message').checked = settings.show_no_videos_message !== 'false';
 }
 
 function initWelcomeForm() {
@@ -1814,6 +1815,7 @@ function initWelcomeForm() {
       welcome_modal_title:            el('welcome-title')?.value.trim() || '',
       welcome_modal_body:             el('welcome-body')?.value.trim()  || '',
       welcome_modal_button:           el('welcome-button')?.value.trim() || 'ENTER',
+      show_no_videos_message:         el('show-no-videos-message')?.checked ? 'true' : 'false',
     };
     try {
       await api('PUT', '/api/admin/settings', payload);
@@ -1904,8 +1906,6 @@ async function loadSettings() {
   loadHeroSettings(settings);
   loadWelcomeSettings(settings);
 
-  const noVideosMsgToggle = document.getElementById('show-no-videos-message');
-  if (noVideosMsgToggle) noVideosMsgToggle.checked = settings.show_no_videos_message !== 'false';
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
@@ -1921,13 +1921,6 @@ async function loadSettings() {
     initHeroForm();
     initWelcomeForm();
     initExportImport();
-
-    document.getElementById('show-no-videos-message')?.addEventListener('change', async function () {
-      try {
-        await api('PUT', '/api/admin/settings', { show_no_videos_message: this.checked ? 'true' : 'false' });
-        toast('Media settings saved');
-      } catch (_) { toast('Error saving media settings', 'error'); }
-    });
 
     // Load media sections
     await Promise.all([loadVideos(), loadFonts(), loadFaviconSection()]);
