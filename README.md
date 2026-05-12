@@ -33,11 +33,43 @@ fully configurable admin panel.
 git clone https://github.com/bferd/the-firmament
 cd the-firmament
 cp .env.example .env
-# Edit docker-compose.yml with your IPs
+cp docker-compose.example.yml docker-compose.yml
+```
+
+Edit `.env` and fill in your values:
+- `AUTHELIA_URL` — your Authelia instance IP and port
+- `NPMPLUS_IP` — your NPMplus reverse proxy IP
+- `BIND_IP` — your server IP
+- `PROXY_SECRET` — generate a random secret (see below)
+
+Make the same IP and PROXY_SECRET changes in `docker-compose.yml`.
+
+Generate a secure PROXY_SECRET:
+```bash
+openssl rand -hex 32
+```
+
+Then add the same value to your NPMplus Advanced config for the schroth.ca proxy host:
+```nginx
+proxy_set_header X-Proxy-Secret your-generated-secret;
+```
+
+> **Security note:** PROXY_SECRET prevents admin API bypass. 
+> Without it any device on your LAN could access the admin 
+> API directly without going through Authelia.
+
+Then build and start:
+```bash
+# Create the data directory with correct permissions
+mkdir -p data
+sudo chown -R 1000:1000 data
+
 docker compose up -d --build
 ```
 
 Then visit `http://your-server-ip:3000`
+
+> **Note:** InfluxDB and Borg-UI tokens are configured through the admin panel at `/admin` — not in `.env`.
 
 ## Services Dashboard
 

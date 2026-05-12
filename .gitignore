@@ -33,3 +33,5 @@ Thumbs.db
 .claude/
 CLAUDE.md
 .claudeignore
+docker-compose.yml
+docker-compose.yml
