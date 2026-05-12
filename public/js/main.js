@@ -369,6 +369,61 @@ function waitForVideoReady(video) {
   });
 }
 
+// ── Video error fallback UI ───────────────────────────────────────────────
+function showVideoErrorMessage(mask, onContinue) {
+  if (!mask) { onContinue(); return; }
+
+  const throbber = mask.querySelector('.mask-throbber');
+  if (throbber) throbber.style.display = 'none';
+
+  const box = document.createElement('div');
+  box.style.cssText = [
+    'display:flex',
+    'flex-direction:column',
+    'align-items:center',
+    'gap:1.2rem',
+    'padding:2rem 2.5rem',
+    'background:var(--card)',
+    'backdrop-filter:blur(12px)',
+    '-webkit-backdrop-filter:blur(12px)',
+    'border:1px solid var(--border)',
+    'border-radius:4px',
+    'font-family:var(--font-mono)',
+    'color:var(--cyan)',
+    'max-width:380px',
+    'text-align:center',
+  ].join(';');
+
+  const heading = document.createElement('div');
+  heading.style.cssText = 'font-size:0.9rem;letter-spacing:0.08em;';
+  heading.textContent = '● NO CHARACTER VIDEOS FOUND';
+
+  const msg = document.createElement('div');
+  msg.style.cssText = 'font-size:0.75rem;opacity:0.7;line-height:1.7;';
+  msg.textContent = 'Add video files to the /videos/ directory to enable the full experience. See README for setup instructions.';
+
+  const btn = document.createElement('button');
+  btn.style.cssText = [
+    'margin-top:0.25rem',
+    'padding:0.6rem 1.5rem',
+    'background:var(--cyan)',
+    'color:var(--bg)',
+    'border:none',
+    'border-radius:2px',
+    'font-family:var(--font-mono)',
+    'font-size:0.78rem',
+    'letter-spacing:0.1em',
+    'cursor:pointer',
+  ].join(';');
+  btn.textContent = 'CONTINUE TO DASHBOARD';
+  btn.addEventListener('click', onContinue, { once: true });
+
+  box.appendChild(heading);
+  box.appendChild(msg);
+  box.appendChild(btn);
+  mask.appendChild(box);
+}
+
 // ── Boot ─────────────────────────────────────────────────────────────────
 async function boot() {
   window.scrollTo(0, 0);
@@ -403,6 +458,8 @@ async function boot() {
   }
 
   let safetyTimer;
+  let revealDone = false;
+  let bgError = false, welcomeError = false, idleError = false;
 
   function startVideoSequence() {
     heroBgVideo.play().catch(() => {});
@@ -413,12 +470,64 @@ async function boot() {
   }
 
   function revealHero() {
+    if (revealDone) return;
+    revealDone = true;
     clearTimeout(safetyTimer);
     if (mask) {
       mask.classList.add('fade-out');
       setTimeout(() => { mask.style.display = 'none'; }, 400);
     }
     startVideoSequence();
+  }
+
+  function skipToDashboard() {
+    if (revealDone) return;
+    revealDone = true;
+    clearTimeout(safetyTimer);
+
+    if (mask) {
+      mask.style.transition = 'opacity 0.4s ease';
+      mask.style.opacity    = '0';
+      setTimeout(() => { mask.style.display = 'none'; }, 400);
+    }
+
+    engelPanel.classList.add('visible');
+    mainContent.classList.add('panel-open');
+    siteHeader.classList.add('visible');
+
+    panelVideo.src           = '/videos/engel-browse-idle.webm';
+    panelVideo.loop          = true;
+    panelVideo.style.opacity = '1';
+    panelVideo.load();
+    panelVideo.play().catch(() => {});
+
+    state = 'browse';
+    unlockScroll();
+    applyMobilePanelVisibility(mobilePanelSetting);
+    loadServices(false);
+    heroObserver.observe(hero);
+    startMetricsPoll();
+
+    setTimeout(() => {
+      document.getElementById('services')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 400);
+  }
+
+  function checkVideoErrors() {
+    const anyError   = bgError || welcomeError || idleError;
+    const allErrored = bgError && welcomeError && idleError;
+
+    if (allErrored) {
+      if (revealDone) return;
+      clearTimeout(safetyTimer);
+      showVideoErrorMessage(mask, skipToDashboard);
+      return;
+    }
+
+    if (anyError && !revealDone) {
+      clearTimeout(safetyTimer);
+      safetyTimer = setTimeout(revealHero, 3000);
+    }
   }
 
   // Load background video
@@ -440,14 +549,17 @@ async function boot() {
     crossfadeHeroTo('/videos/engel-idle-loop.webm', true);
   }, { once: true });
 
-  // Gate mask on all three videos being fully buffered
-  const safetyPromise  = new Promise(resolve => { safetyTimer = setTimeout(resolve, 8000); });
-  const videosReady    = Promise.all([
+  heroBgVideo.addEventListener('error',   () => { bgError      = true; checkVideoErrors(); }, { once: true });
+  activeVideo.addEventListener('error',   () => { welcomeError = true; checkVideoErrors(); }, { once: true });
+  inactiveVideo.addEventListener('error', () => { idleError    = true; checkVideoErrors(); }, { once: true });
+
+  // Gate mask on all three videos being fully buffered; safety fallback at 8s
+  safetyTimer = setTimeout(revealHero, 8000);
+  Promise.all([
     waitForVideoReady(heroBgVideo),
     waitForVideoReady(activeVideo),
     waitForVideoReady(inactiveVideo),
-  ]);
-  Promise.race([videosReady, safetyPromise]).then(revealHero);
+  ]).then(revealHero);
 
   // Auth
   await checkAuthStatus();
