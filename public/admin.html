@@ -53,6 +53,16 @@
     </div>
 
     <div class="sidebar-footer">
+      <div id="auth-interval-control">
+        <label for="auth-interval-select">ADMIN TIMEOUT</label>
+        <select id="auth-interval-select">
+          <option value="300000">5 min</option>
+          <option value="600000">10 min</option>
+          <option value="1800000">30 min</option>
+          <option value="3600000">60 min</option>
+          <option value="0">Disabled</option>
+        </select>
+      </div>
       <a href="/">← Back to Portal</a>
       <a href="https://auth.schroth.ca/logout?rd=https://schroth.ca" id="admin-logout-link">Log Out</a>
     </div>
@@ -515,11 +525,20 @@
             <div class="form-group">
               <label>Theme Preset</label>
               <select id="theme-preset">
-                <option value="firmament-dark">FIRMAMENT DARK</option>
-                <option value="firmament-light">FIRMAMENT LIGHT</option>
+                <option value="firmament">FIRMAMENT</option>
                 <option value="ember">EMBER</option>
                 <option value="verdant">VERDANT</option>
                 <option value="seraph">SERAPH</option>
+                <option value="ionos">IONOS</option>
+                <option value="aurora">AURORA</option>
+                <option value="nebula">NEBULA</option>
+                <option value="eclipse">ECLIPSE</option>
+                <option value="solstice">SOLSTICE</option>
+                <option value="zenith">ZENITH</option>
+                <option value="nadir">NADIR</option>
+                <option value="cherub">CHERUB</option>
+                <option value="throne">THRONE</option>
+                <option value="sanctum">SANCTUM</option>
                 <option value="custom">CUSTOM</option>
               </select>
             </div>
@@ -537,9 +556,10 @@
                 </div>
               </div>
               <div style="display:flex;gap:1rem">
-                <span id="tp-accent" style="font-size:0.78rem">Accent</span>
-                <span id="tp-text"   style="font-size:0.78rem">Primary text</span>
-                <span id="tp-dim"    style="font-size:0.78rem">Dimmed text</span>
+                <span id="tp-accent"  style="font-size:0.78rem">Accent</span>
+                <span id="tp-accent2" style="font-size:0.78rem">Secondary</span>
+                <span id="tp-text"    style="font-size:0.78rem">Primary text</span>
+                <span id="tp-dim"     style="font-size:0.78rem">Dimmed text</span>
               </div>
             </div>
           </div>

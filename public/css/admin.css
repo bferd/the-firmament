@@ -132,6 +132,45 @@ body::before {
 
 .sidebar-footer a:hover { color: var(--cyan); }
 
+#auth-interval-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.25rem;
+}
+
+#auth-interval-control label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+#auth-interval-select {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.85rem;
+  padding: 0.55rem 0.75rem;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+#auth-interval-select:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.1);
+}
+#auth-interval-select option { background: var(--bg2); color: var(--text); }
+
 /* ── Main content ─────────────────────────────────────────────────────────── */
 #admin-main {
   flex: 1;
@@ -286,8 +325,8 @@ body::before {
 }
 
 .btn-primary:hover {
-  box-shadow: 0 0 16px rgba(0, 229, 255, 0.4);
-  background: #33ecff;
+  box-shadow: 0 0 16px rgba(var(--purple-rgb, 139, 92, 246), 0.5);
+  filter: brightness(1.15);
 }
 
 .btn-secondary {
@@ -297,8 +336,9 @@ body::before {
 }
 
 .btn-secondary:hover {
-  border-color: var(--text-dim);
-  color: var(--white);
+  border-color: var(--purple);
+  color: var(--purple);
+  box-shadow: 0 0 12px rgba(var(--purple-rgb, 139, 92, 246), 0.3);
 }
 
 .btn-danger {
@@ -315,6 +355,26 @@ body::before {
 .btn-sm {
   padding: 0.3rem 0.7rem;
   font-size: 0.65rem;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.selected-file-name {
+  display: block;
+  text-align: left !important;
+  padding-left: 0;
+  margin-top: 0.35rem;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 /* ── Tables / Lists ─────────────────────────────────────────────────────── */

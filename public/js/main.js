@@ -757,6 +757,7 @@ function buildCard(svc) {
 
 // ── Panel metrics ─────────────────────────────────────────────────────────
 let metricsTimer = null;
+let authRecheckInterval = null;
 
 function startMetricsPoll() {
   if (metricsTimer) return;
@@ -874,7 +875,7 @@ function updatePanelMetrics(data) {
     }
 
     entry.innerHTML = `
-      <div class="panel-node-name">${escHtml(node.display_name)}</div>
+      <div class="panel-node-name"${node.host && node.host !== node.display_name ? ` data-tooltip="${escHtml(node.host)}"` : ''}>${escHtml(node.display_name)}</div>
       <div class="panel-node-stats">${stats.join('')}</div>
     `;
     nodesEl.appendChild(entry);
@@ -974,8 +975,12 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') checkAuthStatus();
 });
 
-// Re-check every 5 minutes while the tab is open
-setInterval(checkAuthStatus, 5 * 60 * 1000);
+function setupAuthRecheck(themeData) {
+  if (authRecheckInterval) { clearInterval(authRecheckInterval); authRecheckInterval = null; }
+  const sessionOverride = sessionStorage.getItem('auth_recheck_interval');
+  const ms = parseInt(sessionOverride !== null ? sessionOverride : (themeData?.auth_recheck_interval || '300000'), 10);
+  if (ms > 0) authRecheckInterval = setInterval(checkAuthStatus, ms);
+}
 
 // ── Fast boot — skip hero when returning from /admin ─────────────────────
 async function bootFast() {
@@ -1137,13 +1142,21 @@ async function applyTheme() {
     // Derived vars
     const accentRgb = hexToRgb(theme.theme_accent_primary);
     if (accentRgb) {
+      root.style.setProperty('--cyan-rgb', `${accentRgb.r},${accentRgb.g},${accentRgb.b}`);
       root.style.setProperty('--border', `rgba(${accentRgb.r},${accentRgb.g},${accentRgb.b},0.12)`);
+    }
+    if (theme.theme_accent_secondary) {
+      root.style.setProperty('--purple', theme.theme_accent_secondary);
+      const purpleRgb = hexToRgb(theme.theme_accent_secondary);
+      if (purpleRgb) root.style.setProperty('--purple-rgb', `${purpleRgb.r},${purpleRgb.g},${purpleRgb.b}`);
     }
     const bg2Rgb     = hexToRgb(theme.theme_bg_secondary);
     const cardOpacity = parseFloat(theme.theme_card_opacity) || 0.85;
     if (bg2Rgb) {
       root.style.setProperty('--card', `rgba(${bg2Rgb.r},${bg2Rgb.g},${bg2Rgb.b},${cardOpacity})`);
+      root.style.setProperty('--bg2-rgb', `${bg2Rgb.r},${bg2Rgb.g},${bg2Rgb.b}`);
     }
+    root.style.setProperty('--card-opacity', String(cardOpacity));
 
     // Effects
     const intensity = theme.theme_scanlines === 'false' ? '0' : (theme.theme_scanline_intensity || '0.012');
@@ -1201,10 +1214,10 @@ async function applyTheme() {
     document.body.classList.toggle('hide-scroll-hint',  theme.hero_show_scroll_indicator === 'false');
 
     // Card style
+    const cardStyle = theme.layout_card_style || 'glass';
     ['glass','solid','minimal','bordered'].forEach(s => document.body.classList.remove(`card-style-${s}`));
-    if (theme.layout_card_style && theme.layout_card_style !== 'glass') {
-      document.body.classList.add(`card-style-${theme.layout_card_style}`);
-    }
+    if (cardStyle !== 'glass') document.body.classList.add(`card-style-${cardStyle}`);
+    document.body.setAttribute('data-card-style', cardStyle);
 
     // Desktop columns override
     let styleEl = document.getElementById('layout-override-style');
@@ -1303,6 +1316,9 @@ async function applyTheme() {
 
     // Welcome modal
     showWelcomeModal(theme);
+
+    // Auth recheck interval
+    setupAuthRecheck(theme);
 
   } catch (_) {}
 }

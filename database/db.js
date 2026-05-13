@@ -123,7 +123,7 @@ for (const [k, v] of [
   ['borg_repository_names',     '{}'],
 
   // Theme & appearance
-  ['theme_preset',             'firmament-dark'],
+  ['theme_preset',             'firmament'],
   ['theme_accent_primary',     '#00e5ff'],
   ['theme_accent_secondary',   '#8b5cf6'],
   ['theme_bg_primary',         '#04080f'],
@@ -180,6 +180,7 @@ for (const [k, v] of [
 
   // Media behaviour
   ['show_no_videos_message', 'true'],
+  ['auth_recheck_interval',  '300000'],
 ]) { _ig.run(k, v); }
 
 module.exports = db;

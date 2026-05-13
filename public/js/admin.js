@@ -1168,10 +1168,11 @@ async function loadVideos() {
         <div class="media-actions">
           <input type="file" id="mf-${escHtml(v.slot)}" accept=".mp4,.webm" style="display:none">
           <label for="mf-${escHtml(v.slot)}" class="btn btn-secondary btn-sm" style="cursor:pointer">Choose File</label>
-          <button type="button" class="btn btn-secondary btn-sm" id="mub-${escHtml(v.slot)}">Upload</button>
+          <button type="button" class="btn btn-secondary btn-sm" id="mub-${escHtml(v.slot)}" style="display:none">Upload</button>
           ${v.filename ? `<button type="button" class="btn btn-secondary btn-sm" onclick="previewVideo('${escHtml(v.slot)}','${escHtml(v.filename)}')">Preview</button>` : ''}
           ${v.filename ? `<button type="button" class="btn btn-danger btn-sm" onclick="deleteVideo('${escHtml(v.slot)}')">Delete</button>` : ''}
         </div>
+        <span class="selected-file-name" id="sfn-${escHtml(v.slot)}"></span>
         <div class="upload-progress" id="mprog-${escHtml(v.slot)}">
           <div class="upload-progress-bar"><div class="upload-progress-fill" id="mprogfill-${escHtml(v.slot)}"></div></div>
           <span id="mprogpct-${escHtml(v.slot)}">0%</span>
@@ -1179,6 +1180,19 @@ async function loadVideos() {
       </div>
     `;
     container.appendChild(row);
+
+    const vFileInput = document.getElementById(`mf-${v.slot}`);
+    const vUploadBtn = document.getElementById(`mub-${v.slot}`);
+    const vSfnLabel  = document.getElementById(`sfn-${v.slot}`);
+    vFileInput?.addEventListener('change', () => {
+      if (vFileInput.files.length > 0) {
+        vUploadBtn.style.display = 'inline-flex';
+        if (vSfnLabel) vSfnLabel.textContent = vFileInput.files[0].name;
+      } else {
+        vUploadBtn.style.display = 'none';
+        if (vSfnLabel) vSfnLabel.textContent = '';
+      }
+    });
 
     document.getElementById(`mub-${v.slot}`).addEventListener('click', () => uploadVideo(v.slot));
   }
@@ -1259,14 +1273,31 @@ async function loadFonts() {
         <div class="media-slot-label" style="font-size:0.58rem">${escHtml(label)}</div>
         <div class="media-file-info">${fileInfo}</div>
       </div>
-      <div class="media-actions">
-        <input type="file" id="ff-${escHtml(slot)}" accept=".woff2,.woff,.ttf" style="display:none">
-        <label for="ff-${escHtml(slot)}" class="btn btn-secondary btn-sm" style="cursor:pointer">Choose File</label>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="uploadFont('${escHtml(slot)}')">Upload</button>
-        ${info.filename ? `<button type="button" class="btn btn-danger btn-sm" onclick="deleteFont('${escHtml(slot)}')">Remove</button>` : ''}
+      <div>
+        <div class="media-actions">
+          <input type="file" id="ff-${escHtml(slot)}" accept=".woff2,.woff,.ttf" style="display:none">
+          <label for="ff-${escHtml(slot)}" class="btn btn-secondary btn-sm" style="cursor:pointer">Choose File</label>
+          <button type="button" class="btn btn-secondary btn-sm" id="fub-${escHtml(slot)}" style="display:none">Upload</button>
+          ${info.filename ? `<button type="button" class="btn btn-danger btn-sm" onclick="deleteFont('${escHtml(slot)}')">Remove</button>` : ''}
+        </div>
+        <span class="selected-file-name" id="sfn-ff-${escHtml(slot)}"></span>
       </div>
     `;
     container.appendChild(row);
+
+    const fFileInput = document.getElementById(`ff-${slot}`);
+    const fUploadBtn = document.getElementById(`fub-${slot}`);
+    const fSfnLabel  = document.getElementById(`sfn-ff-${slot}`);
+    fFileInput?.addEventListener('change', () => {
+      if (fFileInput.files.length > 0) {
+        fUploadBtn.style.display = 'inline-flex';
+        if (fSfnLabel) fSfnLabel.textContent = fFileInput.files[0].name;
+      } else {
+        fUploadBtn.style.display = 'none';
+        if (fSfnLabel) fSfnLabel.textContent = '';
+      }
+    });
+    fUploadBtn?.addEventListener('click', () => uploadFont(slot));
   }
 }
 
@@ -1332,13 +1363,27 @@ async function loadFaviconSection() {
           <div class="media-actions">
             <input type="file" id="fav-file-${escHtml(slot)}" accept="${escHtml(info.accept)}" style="display:none">
             <label for="fav-file-${escHtml(slot)}" class="btn btn-secondary btn-sm" style="cursor:pointer">Choose File</label>
-            <button type="button" class="btn btn-secondary btn-sm" id="fav-upload-${escHtml(slot)}">Upload</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="fav-upload-${escHtml(slot)}" style="display:none">Upload</button>
             ${fav.filename ? `<button type="button" class="btn btn-danger btn-sm" id="fav-delete-${escHtml(slot)}">Delete</button>` : ''}
           </div>
         </div>
+        <span class="selected-file-name" id="sfn-fav-${escHtml(slot)}"></span>
       </div>
     `;
     container.appendChild(row);
+
+    const favFileInput = document.getElementById(`fav-file-${slot}`);
+    const favUploadBtn = document.getElementById(`fav-upload-${slot}`);
+    const favSfnLabel  = document.getElementById(`sfn-fav-${slot}`);
+    favFileInput?.addEventListener('change', () => {
+      if (favFileInput.files.length > 0) {
+        favUploadBtn.style.display = 'inline-flex';
+        if (favSfnLabel) favSfnLabel.textContent = favFileInput.files[0].name;
+      } else {
+        favUploadBtn.style.display = 'none';
+        if (favSfnLabel) favSfnLabel.textContent = '';
+      }
+    });
 
     document.getElementById(`fav-upload-${slot}`).addEventListener('click', async () => {
       const input = document.getElementById(`fav-file-${slot}`);
@@ -1405,6 +1450,15 @@ function uploadFileXHR(url, formData, onProgress) {
 }
 
 // ── Admin theme application ───────────────────────────────────────────────
+function hexToRgb(hex) {
+  if (!hex || hex.length < 7) return { r: 0, g: 0, b: 0 };
+  return {
+    r: parseInt(hex.slice(1, 3), 16),
+    g: parseInt(hex.slice(3, 5), 16),
+    b: parseInt(hex.slice(5, 7), 16),
+  };
+}
+
 const ADMIN_PRELOADED_FONTS = new Set(['Orbitron', 'Rajdhani', 'Share Tech Mono']);
 
 function loadAdminGoogleFont(fontName) {
@@ -1430,6 +1484,25 @@ async function applyAdminTheme() {
     if (theme.theme_accent_secondary)  root.style.setProperty('--purple',   theme.theme_accent_secondary);
     if (theme.theme_text_primary)      root.style.setProperty('--text',     theme.theme_text_primary);
     if (theme.theme_text_dim)          root.style.setProperty('--text-dim', theme.theme_text_dim);
+
+    if (theme.theme_bg_secondary) {
+      const bg2 = hexToRgb(theme.theme_bg_secondary);
+      const r3 = Math.min(255, bg2.r + 6);
+      const g3 = Math.min(255, bg2.g + 10);
+      const b3 = Math.min(255, bg2.b + 16);
+      root.style.setProperty('--bg3', `rgb(${r3},${g3},${b3})`);
+      const cardOp = parseFloat(theme.theme_card_opacity) || 0.9;
+      root.style.setProperty('--card', `rgba(${bg2.r},${bg2.g},${bg2.b},${cardOp})`);
+      root.style.setProperty('--bg2-rgb', `${bg2.r},${bg2.g},${bg2.b}`);
+    }
+    if (theme.theme_accent_primary) {
+      const acc = hexToRgb(theme.theme_accent_primary);
+      root.style.setProperty('--border', `rgba(${acc.r},${acc.g},${acc.b},0.12)`);
+    }
+    if (theme.theme_accent_secondary) {
+      const purp = hexToRgb(theme.theme_accent_secondary);
+      root.style.setProperty('--purple-rgb', `${purp.r},${purp.g},${purp.b}`);
+    }
 
     // Scanlines
     const scanlineEl = document.getElementById('scanline-style');
@@ -1481,7 +1554,7 @@ async function applyAdminTheme() {
 
 // ── Theme presets ─────────────────────────────────────────────────────────
 const THEME_PRESETS = {
-  'firmament-dark': {
+  'firmament': {
     theme_accent_primary:     '#00e5ff',
     theme_accent_secondary:   '#8b5cf6',
     theme_bg_primary:         '#04080f',
@@ -1491,17 +1564,6 @@ const THEME_PRESETS = {
     theme_card_opacity:       '0.85',
     theme_scanlines:          'true',
     theme_scanline_intensity: '0.012',
-  },
-  'firmament-light': {
-    theme_accent_primary:     '#0077aa',
-    theme_accent_secondary:   '#6d28d9',
-    theme_bg_primary:         '#f0f4f8',
-    theme_bg_secondary:       '#e2e8f0',
-    theme_text_primary:       '#1a2332',
-    theme_text_dim:           '#4a6080',
-    theme_card_opacity:       '0.90',
-    theme_scanlines:          'false',
-    theme_scanline_intensity: '0',
   },
   'ember': {
     theme_accent_primary:     '#ff6b2b',
@@ -1533,6 +1595,116 @@ const THEME_PRESETS = {
     theme_text_primary:       '#f0e6d3',
     theme_text_dim:           '#9a8060',
     theme_card_opacity:       '0.85',
+    theme_scanlines:          'false',
+    theme_scanline_intensity: '0',
+  },
+  'ionos': {
+    theme_accent_primary:     '#4f46e5',
+    theme_accent_secondary:   '#7c3aed',
+    theme_bg_primary:         '#05030f',
+    theme_bg_secondary:       '#0a0620',
+    theme_text_primary:       '#c4c0f0',
+    theme_text_dim:           '#6660a0',
+    theme_card_opacity:       '0.85',
+    theme_scanlines:          'true',
+    theme_scanline_intensity: '0.010',
+  },
+  'aurora': {
+    theme_accent_primary:     '#00ff9d',
+    theme_accent_secondary:   '#e040fb',
+    theme_bg_primary:         '#030a0f',
+    theme_bg_secondary:       '#060f18',
+    theme_text_primary:       '#d0eee8',
+    theme_text_dim:           '#507a70',
+    theme_card_opacity:       '0.85',
+    theme_scanlines:          'true',
+    theme_scanline_intensity: '0.008',
+  },
+  'nebula': {
+    theme_accent_primary:     '#e040fb',
+    theme_accent_secondary:   '#ff4081',
+    theme_bg_primary:         '#0a0310',
+    theme_bg_secondary:       '#130520',
+    theme_text_primary:       '#e8c0f0',
+    theme_text_dim:           '#8a5090',
+    theme_card_opacity:       '0.85',
+    theme_scanlines:          'true',
+    theme_scanline_intensity: '0.008',
+  },
+  'eclipse': {
+    theme_accent_primary:     '#ff6d00',
+    theme_accent_secondary:   '#ffab00',
+    theme_bg_primary:         '#080400',
+    theme_bg_secondary:       '#120800',
+    theme_text_primary:       '#f0e0c8',
+    theme_text_dim:           '#8a6040',
+    theme_card_opacity:       '0.90',
+    theme_scanlines:          'false',
+    theme_scanline_intensity: '0',
+  },
+  'solstice': {
+    theme_accent_primary:     '#fbbf24',
+    theme_accent_secondary:   '#3b82f6',
+    theme_bg_primary:         '#080610',
+    theme_bg_secondary:       '#0f0c1e',
+    theme_text_primary:       '#e8e0d0',
+    theme_text_dim:           '#7a7060',
+    theme_card_opacity:       '0.85',
+    theme_scanlines:          'true',
+    theme_scanline_intensity: '0.008',
+  },
+  'zenith': {
+    theme_accent_primary:     '#2979ff',
+    theme_accent_secondary:   '#00e5ff',
+    theme_bg_primary:         '#f5f7ff',
+    theme_bg_secondary:       '#e8ecff',
+    theme_text_primary:       '#0a1628',
+    theme_text_dim:           '#4a5580',
+    theme_card_opacity:       '0.92',
+    theme_scanlines:          'false',
+    theme_scanline_intensity: '0',
+  },
+  'nadir': {
+    theme_accent_primary:     '#c62828',
+    theme_accent_secondary:   '#b71c1c',
+    theme_bg_primary:         '#020202',
+    theme_bg_secondary:       '#080404',
+    theme_text_primary:       '#c8b8b8',
+    theme_text_dim:           '#6a4a4a',
+    theme_card_opacity:       '0.90',
+    theme_scanlines:          'true',
+    theme_scanline_intensity: '0.015',
+  },
+  'cherub': {
+    theme_accent_primary:     '#f06292',
+    theme_accent_secondary:   '#f8bbd9',
+    theme_bg_primary:         '#fdf6f8',
+    theme_bg_secondary:       '#f5e6ec',
+    theme_text_primary:       '#3a1a24',
+    theme_text_dim:           '#9a6070',
+    theme_card_opacity:       '0.90',
+    theme_scanlines:          'false',
+    theme_scanline_intensity: '0',
+  },
+  'throne': {
+    theme_accent_primary:     '#ffd700',
+    theme_accent_secondary:   '#9c27b0',
+    theme_bg_primary:         '#06030e',
+    theme_bg_secondary:       '#0e0520',
+    theme_text_primary:       '#e8e0f0',
+    theme_text_dim:           '#7a6090',
+    theme_card_opacity:       '0.88',
+    theme_scanlines:          'true',
+    theme_scanline_intensity: '0.010',
+  },
+  'sanctum': {
+    theme_accent_primary:     '#90caf9',
+    theme_accent_secondary:   '#b0bec5',
+    theme_bg_primary:         '#f0f4f8',
+    theme_bg_secondary:       '#e2e8f0',
+    theme_text_primary:       '#1a2332',
+    theme_text_dim:           '#4a6080',
+    theme_card_opacity:       '0.92',
     theme_scanlines:          'false',
     theme_scanline_intensity: '0',
   },
@@ -1572,25 +1744,27 @@ function setColourControlsDisabled(disabled) {
 }
 
 function updateThemePreview() {
-  const bg  = getColourValue('bg-primary');
-  const bg2 = getColourValue('bg-secondary');
-  const acc = getColourValue('accent-primary');
-  const txt = getColourValue('text-primary');
-  const dim = getColourValue('text-dim');
-  const op  = document.getElementById('theme-card-opacity')?.value || '0.85';
+  const bg   = getColourValue('bg-primary');
+  const bg2  = getColourValue('bg-secondary');
+  const acc  = getColourValue('accent-primary');
+  const acc2 = getColourValue('accent-secondary');
+  const txt  = getColourValue('text-primary');
+  const dim  = getColourValue('text-dim');
+  const op   = document.getElementById('theme-card-opacity')?.value || '0.85';
 
-  const preview  = document.getElementById('theme-preview');
-  const bgSwatch = document.getElementById('tp-bg-swatch');
-  const card     = document.getElementById('tp-card');
-  const nameEl   = document.getElementById('tp-name');
-  const urlEl    = document.getElementById('tp-url');
-  const descEl   = document.getElementById('tp-desc');
-  const accentEl = document.getElementById('tp-accent');
-  const textEl   = document.getElementById('tp-text');
-  const dimEl    = document.getElementById('tp-dim');
+  const preview   = document.getElementById('theme-preview');
+  const bgSwatch  = document.getElementById('tp-bg-swatch');
+  const card      = document.getElementById('tp-card');
+  const nameEl    = document.getElementById('tp-name');
+  const urlEl     = document.getElementById('tp-url');
+  const descEl    = document.getElementById('tp-desc');
+  const accentEl  = document.getElementById('tp-accent');
+  const accent2El = document.getElementById('tp-accent2');
+  const textEl    = document.getElementById('tp-text');
+  const dimEl     = document.getElementById('tp-dim');
 
-  if (preview)  preview.style.background  = bg;
-  if (bgSwatch) bgSwatch.style.background = bg2;
+  if (preview)   preview.style.background  = bg;
+  if (bgSwatch)  bgSwatch.style.background = bg2;
   if (card) {
     const r = parseInt(bg2.slice(1,3),16)||6;
     const g = parseInt(bg2.slice(3,5),16)||16;
@@ -1598,16 +1772,18 @@ function updateThemePreview() {
     card.style.background   = `rgba(${r},${g},${b},${op})`;
     card.style.borderColor  = `rgba(${parseInt(acc.slice(1,3),16)||0},${parseInt(acc.slice(3,5),16)||229},${parseInt(acc.slice(5,7),16)||255},0.2)`;
   }
-  if (nameEl)   nameEl.style.color   = txt;
-  if (urlEl)    urlEl.style.color    = dim;
-  if (descEl)   descEl.style.color   = dim;
-  if (accentEl) accentEl.style.color = acc;
-  if (textEl)   textEl.style.color   = txt;
-  if (dimEl)    dimEl.style.color    = dim;
+  if (nameEl)    nameEl.style.color    = txt;
+  if (urlEl)     urlEl.style.color     = dim;
+  if (descEl)    descEl.style.color    = dim;
+  if (accentEl)  accentEl.style.color  = acc;
+  if (accent2El) accent2El.style.color = acc2;
+  if (textEl)    textEl.style.color    = txt;
+  if (dimEl)     dimEl.style.color     = dim;
 }
 
 function loadAppearanceSettings(settings) {
-  const preset = settings.theme_preset || 'firmament-dark';
+  const rawPreset = settings.theme_preset || 'firmament';
+  const preset = rawPreset === 'firmament-dark' ? 'firmament' : rawPreset;
   const presetEl = document.getElementById('theme-preset');
   if (presetEl) presetEl.value = preset;
 
@@ -1652,6 +1828,14 @@ function initAppearanceForm() {
       COLOUR_FIELDS.forEach(([fid, key]) => syncColourInputs(fid, data[key] || ''));
       const opEl = document.getElementById('theme-card-opacity');
       if (opEl) { opEl.value = data.theme_card_opacity || '0.85'; document.getElementById('card-opacity-val').textContent = opEl.value; }
+      const scanlinesEl = document.getElementById('theme-scanlines');
+      if (scanlinesEl) scanlinesEl.checked = (data.theme_scanlines !== 'false');
+      const scanlineIntEl = document.getElementById('theme-scanline-intensity');
+      if (scanlineIntEl) {
+        scanlineIntEl.value = data.theme_scanline_intensity || '0.012';
+        const scanlineValEl = document.getElementById('scanline-intensity-val');
+        if (scanlineValEl) scanlineValEl.textContent = parseFloat(scanlineIntEl.value).toFixed(3);
+      }
     }
     setColourControlsDisabled(this.value !== 'custom');
     updateThemePreview();
@@ -1682,7 +1866,7 @@ function initAppearanceForm() {
   // Form submit
   document.getElementById('appearance-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const preset = document.getElementById('theme-preset')?.value || 'firmament-dark';
+    const preset = document.getElementById('theme-preset')?.value || 'firmament';
     const payload = { theme_preset: preset };
     COLOUR_FIELDS.forEach(([fid, key]) => { payload[key] = getColourValue(fid); });
     payload.theme_card_opacity       = document.getElementById('theme-card-opacity')?.value        || '0.85';
@@ -1695,6 +1879,7 @@ function initAppearanceForm() {
     payload.theme_custom_css         = sanitiseCSS(document.getElementById('theme-custom-css')?.value || '');
     try {
       await api('PUT', '/api/admin/settings', payload);
+      await applyAdminTheme();
       toast('Appearance saved');
     } catch (err) { toast('Error saving appearance', 'error'); }
   });
@@ -1919,6 +2104,19 @@ async function loadSettings() {
   loadCharacterSettings(settings);
   loadHeroSettings(settings);
   loadWelcomeSettings(settings);
+
+  const authIntervalSelect = document.getElementById('auth-interval-select');
+  if (authIntervalSelect) {
+    authIntervalSelect.value = settings.auth_recheck_interval || '300000';
+    authIntervalSelect.addEventListener('change', async () => {
+      const value = authIntervalSelect.value;
+      try {
+        await api('PUT', '/api/admin/settings', { auth_recheck_interval: value });
+        sessionStorage.setItem('auth_recheck_interval', value);
+        toast('Session recheck updated');
+      } catch (_) { toast('Error saving setting', 'error'); }
+    });
+  }
 
 }
 

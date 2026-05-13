@@ -396,6 +396,7 @@ const THEME_KEYS = [
   'welcome_modal_button', 'welcome_modal_once_per_session',
   'favicon_file', 'title',
   'show_no_videos_message',
+  'auth_recheck_interval',
 ];
 
 app.get('/api/theme', (req, res) => {
