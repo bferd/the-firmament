@@ -73,15 +73,12 @@ function parsePrometheus(text) {
   return results;
 }
 
-function metricVal(metrics, name, labelMatch = {}) {
-  const found = metrics.find(m => {
-    if (m.name !== name) return false;
-    for (const [k, v] of Object.entries(labelMatch)) {
-      if (m.labels[k] !== v) return false;
-    }
-    return true;
-  });
-  return found ? found.value : null;
+function getMetric(metrics, name, repoName, labelKey, labelValue) {
+  return metrics.find(m =>
+    m.name === name &&
+    (repoName === null || m.labels.repository === repoName) &&
+    (labelKey === undefined || m.labels[labelKey] === labelValue)
+  )?.value ?? null;
 }
 
 async function fetchBorgStatus(settings) {
@@ -119,10 +116,11 @@ async function fetchBorgStatus(settings) {
   const metrics   = parsePrometheus(text);
   const repoNames = parseJSON(settings.borg_repository_names || '{}', {});
 
-  const reposTotal     = metricVal(metrics, 'borg_ui_repositories_total');
-  const scheduledTotal = metricVal(metrics, 'borg_ui_scheduled_jobs_total');
-  const scheduledEn    = metricVal(metrics, 'borg_ui_scheduled_jobs_enabled');
-  const activeJobs     = metricVal(metrics, 'borg_ui_active_jobs');
+  const reposTotal       = getMetric(metrics, 'borg_ui_repositories_total',     null);
+  const scheduledTotal   = getMetric(metrics, 'borg_ui_scheduled_jobs_total',   null);
+  const scheduledEn      = getMetric(metrics, 'borg_ui_scheduled_jobs_enabled', null);
+  const activeJobs       = getMetric(metrics, 'borg_ui_active_jobs',            null);
+  const activeBackupJobs = getMetric(metrics, 'borg_ui_active_jobs', null, 'type', 'backup') || 0;
 
   // Collect all unique repository names from labelled metrics
   const repoSet = new Set();
@@ -132,20 +130,20 @@ async function fetchBorgStatus(settings) {
 
   const repositories = [];
   for (const repoName of repoSet) {
-    const repoSize       = metricVal(metrics, 'borg_repository_size_bytes',               { repository: repoName });
-    const archiveCount   = metricVal(metrics, 'borg_repository_archive_count',            { repository: repoName });
-    const lastBackupTs   = metricVal(metrics, 'borg_repository_last_backup_timestamp',    { repository: repoName });
-    const lastCheckTs    = metricVal(metrics, 'borg_repository_last_check_timestamp',     { repository: repoName });
-    const lastCompactTs  = metricVal(metrics, 'borg_repository_last_compact_timestamp',   { repository: repoName });
-    const lastSuccess    = metricVal(metrics, 'borg_backup_last_job_success',             { repository: repoName });
-    const lastDuration   = metricVal(metrics, 'borg_backup_last_duration_seconds',        { repository: repoName });
-    const lastOrigSize   = metricVal(metrics, 'borg_backup_last_original_size_bytes',     { repository: repoName });
-    const lastDedupSize  = metricVal(metrics, 'borg_backup_last_deduplicated_size_bytes', { repository: repoName });
-    const backupOrphaned = metricVal(metrics, 'borg_backup_orphaned_jobs_total',          { repository: repoName });
-    const restoreTotal   = metricVal(metrics, 'borg_restore_jobs_total',                  { repository: repoName });
-    const checkTotal     = metricVal(metrics, 'borg_check_jobs_total',                    { repository: repoName });
-    const compactTotal   = metricVal(metrics, 'borg_compact_jobs_total',                  { repository: repoName });
-    const pruneTotal     = metricVal(metrics, 'borg_prune_jobs_total',                    { repository: repoName });
+    const repoSize       = getMetric(metrics, 'borg_repository_size_bytes',               repoName);
+    const archiveCount   = getMetric(metrics, 'borg_repository_archive_count',            repoName);
+    const lastBackupTs   = getMetric(metrics, 'borg_repository_last_backup_timestamp',    repoName);
+    const lastCheckTs    = getMetric(metrics, 'borg_repository_last_check_timestamp',     repoName);
+    const lastCompactTs  = getMetric(metrics, 'borg_repository_last_compact_timestamp',   repoName);
+    const lastSuccess    = getMetric(metrics, 'borg_backup_last_job_success',             repoName);
+    const lastDuration   = getMetric(metrics, 'borg_backup_last_duration_seconds',        repoName);
+    const lastOrigSize   = getMetric(metrics, 'borg_backup_last_original_size_bytes',     repoName);
+    const lastDedupSize  = getMetric(metrics, 'borg_backup_last_deduplicated_size_bytes', repoName);
+    const backupOrphaned = getMetric(metrics, 'borg_backup_orphaned_jobs_total',          repoName);
+    const restoreTotal   = getMetric(metrics, 'borg_restore_jobs_total',                  repoName);
+    const checkTotal     = getMetric(metrics, 'borg_check_jobs_total',                    repoName);
+    const compactTotal   = getMetric(metrics, 'borg_compact_jobs_total',                  repoName);
+    const pruneTotal     = getMetric(metrics, 'borg_prune_jobs_total',                    repoName);
 
     let backupTotal = 0, backupFailed = 0;
     for (const m of metrics) {
@@ -155,8 +153,13 @@ async function fetchBorgStatus(settings) {
       }
     }
 
+    const runningJobs = getMetric(metrics, 'borg_backup_jobs_total', repoName, 'status', 'running') || 0;
+    const isRunning   = runningJobs > 0 || activeBackupJobs > 0;
+
     let repoStatus;
-    if (lastSuccess === null) {
+    if (isRunning) {
+      repoStatus = 'running';
+    } else if (lastSuccess === null) {
       repoStatus = 'unknown';
     } else if (lastSuccess === 0) {
       repoStatus = 'degraded';
@@ -179,7 +182,8 @@ async function fetchBorgStatus(settings) {
       last_backup: lastBackupTs ? {
         timestamp:                 lastBackupTs,
         time_ago:                  timeSince(lastBackupTs),
-        success:                   lastSuccess === 1,
+        success:                   isRunning ? null : lastSuccess === 1,
+        ...(isRunning ? { in_progress: true } : {}),
         duration_seconds:          lastDuration,
         duration_display:          formatDuration(lastDuration),
         original_size_bytes:       lastOrigSize,
@@ -203,11 +207,12 @@ async function fetchBorgStatus(settings) {
     });
   }
 
-  // Overall status is the worst across all repos
+  // Overall status is the worst across all repos; 'running' is neutral (not degraded)
   let status = repositories.length === 0 ? 'unknown' : 'healthy';
   for (const repo of repositories) {
     if (repo.status === 'degraded') { status = 'degraded'; break; }
     if (repo.status === 'warning'  && status !== 'degraded') status = 'warning';
+    if (repo.status === 'running'  && status === 'healthy')  status = 'running';
     if (repo.status === 'unknown'  && status === 'healthy')  status = 'unknown';
   }
 
