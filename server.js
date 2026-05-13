@@ -231,10 +231,12 @@ app.use('/api/admin',       adminLimiter);
 app.use(express.static(PUBLIC_DIR));
 
 // Restrict /videos to video file extensions only
+// no-cache so browsers always revalidate — prevents stale 404s after upload
 app.use('/videos', (req, res, next) => {
   if (!/\.(mp4|webm)$/i.test(req.path)) return res.status(404).send('Not found');
+  res.setHeader('Cache-Control', 'no-cache');
   next();
-}, express.static(VIDEOS_DIR));
+}, express.static(VIDEOS_DIR, { cacheControl: false }));
 
 // Custom fonts — restrict to font file extensions only
 app.use('/fonts', (req, res, next) => {

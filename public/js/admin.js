@@ -1190,6 +1190,7 @@ async function uploadVideo(slot) {
       if (progPct)  progPct.textContent  = `${Math.round(pct * 100)}%`;
     });
     toast(`Uploaded: ${result.filename} (${fmtSize(result.size)})`);
+    sessionStorage.setItem('firmament_force_boot', '1');
     await loadVideos();
   } catch (err) {
     toast('Upload failed: ' + err.message, 'error');
@@ -1802,7 +1803,6 @@ function loadWelcomeSettings(settings) {
   if (el('welcome-title'))          el('welcome-title').value            = settings.welcome_modal_title   || 'WELCOME TO THE FIRMAMENT';
   if (el('welcome-body'))           el('welcome-body').value             = settings.welcome_modal_body    || '';
   if (el('welcome-button'))         el('welcome-button').value           = settings.welcome_modal_button  || 'ENTER';
-  if (el('show-no-videos-message')) el('show-no-videos-message').checked = settings.show_no_videos_message !== 'false';
 }
 
 function initWelcomeForm() {
@@ -1815,7 +1815,6 @@ function initWelcomeForm() {
       welcome_modal_title:            el('welcome-title')?.value.trim() || '',
       welcome_modal_body:             el('welcome-body')?.value.trim()  || '',
       welcome_modal_button:           el('welcome-button')?.value.trim() || 'ENTER',
-      show_no_videos_message:         el('show-no-videos-message')?.checked ? 'true' : 'false',
     };
     try {
       await api('PUT', '/api/admin/settings', payload);
@@ -1876,6 +1875,9 @@ async function loadSettings() {
   document.getElementById('set-borg-interval').value = settings.borg_refresh_interval || '60';
   document.getElementById('set-borg-enabled').checked = settings.borg_enabled !== 'false';
 
+  const noVidEl = document.getElementById('show-no-videos-message');
+  if (noVidEl) noVidEl.checked = settings.show_no_videos_message !== 'false';
+
   const borgRepoNames = parseJSON(settings.borg_repository_names || '{}', {});
   metricsState.borgRepoNames = borgRepoNames;
   renderBorgRepoNames(metricsState.borgRepos, borgRepoNames);
@@ -1921,6 +1923,13 @@ async function loadSettings() {
     initHeroForm();
     initWelcomeForm();
     initExportImport();
+
+    document.getElementById('show-no-videos-message')?.addEventListener('change', async function () {
+      try {
+        await api('PUT', '/api/admin/settings', { show_no_videos_message: this.checked ? 'true' : 'false' });
+        toast(this.checked ? '"No videos" message enabled' : '"No videos" message disabled');
+      } catch (_) { toast('Error saving setting', 'error'); }
+    });
 
     // Load media sections
     await Promise.all([loadVideos(), loadFonts(), loadFaviconSection()]);

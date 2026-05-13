@@ -1333,7 +1333,6 @@ function showWelcomeModal(theme) {
 }
 
 applyLayoutSettings();
-applyTheme();
 
 // ── Start ─────────────────────────────────────────────────────────────────
 const fromAdmin = (() => {
@@ -1341,4 +1340,9 @@ const fromAdmin = (() => {
   catch (_) { return false; }
 })();
 
-fromAdmin ? bootFast() : boot();
+const forceBoot = sessionStorage.getItem('firmament_force_boot') === '1';
+if (forceBoot) sessionStorage.removeItem('firmament_force_boot');
+
+applyTheme().then(() => {
+  (fromAdmin && !forceBoot) ? bootFast() : boot();
+});
