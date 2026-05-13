@@ -998,8 +998,8 @@ function renderBorgMetrics(data) {
     return;
   }
 
-  const statusLabels = { healthy: 'HEALTHY', degraded: 'DEGRADED', warning: 'WARNING', unknown: 'UNKNOWN' };
-  const statusClass  = { healthy: 'healthy', degraded: 'degraded', warning: 'warning', unknown: 'dim' };
+  const statusLabels = { healthy: 'HEALTHY', running: 'RUNNING', degraded: 'DEGRADED', warning: 'WARNING', unknown: 'UNKNOWN' };
+  const statusClass  = { healthy: 'healthy', running: 'running', degraded: 'degraded', warning: 'warning', unknown: 'dim' };
   badge.textContent = statusLabels[data.status] || 'UNKNOWN';
   badge.className   = `borg-status-badge ${statusClass[data.status] || 'dim'}`;
 
@@ -1007,8 +1007,20 @@ function renderBorgMetrics(data) {
 
   for (const repo of (data.repositories || [])) {
     const lb   = repo.last_backup;
-    const lbSuccess = lb ? (lb.success ? '&#x2705; SUCCESS' : '&#x274C; FAILED') : '—';
-    const lbSuccessClass = lb ? (lb.success ? '' : 'borg-failed') : '';
+    let lbSuccess, lbSuccessClass;
+    if (lb?.in_progress) {
+      lbSuccess      = '<span class="spin">&#x27F3;</span> IN PROGRESS';
+      lbSuccessClass = 'borg-running';
+    } else if (lb?.success === true) {
+      lbSuccess      = '&#x2713; SUCCESS';
+      lbSuccessClass = 'borg-success';
+    } else if (lb?.success === false) {
+      lbSuccess      = '&#x2715; FAILED';
+      lbSuccessClass = 'borg-failed';
+    } else {
+      lbSuccess      = '&#x2014; UNKNOWN';
+      lbSuccessClass = 'borg-unknown';
+    }
     const displayName = repo.display_name || repo.name;
 
     const div = document.createElement('div');

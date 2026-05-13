@@ -689,6 +689,8 @@ tr.metrics-warn td { background: rgba(239,68,68,0.04); }
 }
 
 .borg-status-badge.healthy  { color: #22c55e; border-color: rgba(34,197,94,0.4);   background: rgba(34,197,94,0.08);   }
+.borg-status-badge.running  { color: #00e5ff; border-color: rgba(0,229,255,0.4);   background: rgba(0,229,255,0.15);
+  animation: borg-pulse 1.5s infinite; }
 .borg-status-badge.degraded { color: #ef4444; border-color: rgba(239,68,68,0.4);   background: rgba(239,68,68,0.08);
   animation: borg-pulse 1.4s ease-in-out infinite; }
 .borg-status-badge.warning  { color: #fb923c; border-color: rgba(251,146,60,0.4);  background: rgba(251,146,60,0.08);  }
@@ -697,6 +699,14 @@ tr.metrics-warn td { background: rgba(239,68,68,0.04); }
 @keyframes borg-pulse {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.55; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spin {
+  display: inline-block;
+  animation: spin 2s linear infinite;
 }
 
 .borg-repo {
@@ -769,7 +779,10 @@ tr.metrics-warn td { background: rgba(239,68,68,0.04); }
 }
 
 .borg-info-value.cyan-text  { color: var(--cyan); }
-.borg-info-value.borg-failed { color: #ef4444; }
+.borg-info-value.borg-success { color: #22c55e; }
+.borg-info-value.borg-running { color: #00e5ff; }
+.borg-info-value.borg-failed  { color: #ef4444; }
+.borg-info-value.borg-unknown { color: var(--text-dim); }
 
 .borg-jobs-table { font-size: 0.78rem; }
 .borg-jobs-table th { text-align: center; }

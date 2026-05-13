@@ -907,7 +907,9 @@ function updatePanelBackup(data, panelConfig) {
     const displayName = (repo.display_name || repo.name).toUpperCase();
     const lb          = repo.last_backup;
     parts.push(`<div class="panel-backup-label">${escHtml(displayName)}</div>`);
-    if (data.status === 'degraded') {
+    if (repo.status === 'running' || lb?.in_progress) {
+      parts.push(`<div class="panel-backup-status"><span class="panel-backup-dot running">&#9679;</span> BACKUP RUNNING</div>`);
+    } else if (data.status === 'degraded') {
       parts.push(`<div class="panel-backup-status"><span class="panel-backup-dot failed">&#9679;</span> BACKUP FAILED</div>`);
       if (lb) parts.push(`<div class="panel-backup-stat">Last: ${escHtml(lb.time_ago || '—')}</div>`);
     } else {
