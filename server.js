@@ -248,13 +248,14 @@ app.use('/fonts', (req, res, next) => {
 // ── Authelia session verification ──────────────────────────────────────────
 async function verifyAuthelia(req) {
   try {
+    const host     = req.headers.host || 'localhost';
     const response = await fetch(`${AUTHELIA_URL}/api/verify`, {
       method: 'GET',
       headers: {
         'Cookie':             req.headers.cookie || '',
-        'X-Original-URL':    'https://schroth.ca/',
+        'X-Original-URL':    `https://${host}/`,
         'X-Forwarded-Proto': 'https',
-        'X-Forwarded-Host':  'schroth.ca',
+        'X-Forwarded-Host':  host,
         'X-Forwarded-Uri':   '/',
         'X-Forwarded-For':   req.ip || req.connection.remoteAddress,
       },
