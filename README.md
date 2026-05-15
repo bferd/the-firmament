@@ -75,7 +75,10 @@ touching any code.
 ## Mobile
 
 
+<details>
+<summary>Mobile screenshot (click to expand)</summary>
 <img src="https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_fullpage.jpg" width="300" alt="Mobile Full Page">
+</details>
 
 The portal is fully responsive. On mobile 
 the hero works as on desktop. The services 
