@@ -446,6 +446,9 @@ app.put('/api/admin/settings', (req, res) => {
     }
   });
   update(req.body);
+  if (Object.keys(req.body).some(k => k.startsWith('influxdb_'))) {
+    metricsRouter.clearCache();
+  }
   res.json({ ok: true });
 });
 

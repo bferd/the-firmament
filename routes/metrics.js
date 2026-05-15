@@ -388,4 +388,6 @@ router.get('/api/metrics', async (req, res) => {
   }
 });
 
+router.clearCache = () => { cache = { data: null, ts: 0 }; };
+
 module.exports = router;

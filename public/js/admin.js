@@ -1229,6 +1229,7 @@ async function deleteVideo(slot) {
   try {
     await api('DELETE', `/api/admin/video/${slot}`);
     toast('Video deleted');
+    sessionStorage.setItem('firmament_force_boot', '1');
     await loadVideos();
   } catch (err) {
     toast('Error: ' + err.message, 'error');
@@ -1988,6 +1989,7 @@ function initHeroForm() {
     };
     try {
       await api('PUT', '/api/admin/settings', payload);
+      sessionStorage.removeItem('firmament_announcement_dismissed');
       toast('Hero & layout settings saved');
     } catch (err) { toast('Error saving settings', 'error'); }
   });
@@ -2016,6 +2018,7 @@ function initWelcomeForm() {
     };
     try {
       await api('PUT', '/api/admin/settings', payload);
+      sessionStorage.removeItem('firmament_welcome_dismissed');
       toast('Welcome modal settings saved');
     } catch (err) { toast('Error saving settings', 'error'); }
   });
