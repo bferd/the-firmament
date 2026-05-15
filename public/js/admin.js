@@ -789,30 +789,41 @@ document.getElementById('metrics-settings-form').addEventListener('submit', asyn
   const statusConfig  = getStatusConfigFromDOM();
   const panelConfig   = getPanelConfigFromDOM();
 
-  const payload = {
-    influxdb_url:             document.getElementById('set-influx-url').value.trim(),
-    influxdb_token:           document.getElementById('set-influx-token').value.trim(),
-    influxdb_org:             document.getElementById('set-influx-org').value.trim(),
-    influxdb_bucket:          document.getElementById('set-influx-bucket').value.trim(),
+  const connPayload = {
+    influxdb_url:              document.getElementById('set-influx-url').value.trim(),
+    influxdb_token:            document.getElementById('set-influx-token').value.trim(),
+    influxdb_org:              document.getElementById('set-influx-org').value.trim(),
+    influxdb_bucket:           document.getElementById('set-influx-bucket').value.trim(),
     influxdb_refresh_interval: document.getElementById('set-influx-interval').value.trim(),
-    influxdb_node_mappings:   JSON.stringify(nodeMappings),
-    influxdb_thresholds:      JSON.stringify(thresholds),
-    influxdb_overrides:       JSON.stringify(overrides),
-    influxdb_status_config:   JSON.stringify(statusConfig),
-    influxdb_panel_config:    JSON.stringify(panelConfig),
+    influxdb_node_mappings:    JSON.stringify(nodeMappings),
+    influxdb_thresholds:       JSON.stringify(thresholds),
+    influxdb_overrides:        JSON.stringify(overrides),
+    influxdb_status_config:    JSON.stringify(statusConfig),
   };
+  const panelPayload = { influxdb_panel_config: JSON.stringify(panelConfig) };
 
+  let connBlocked = false;
   try {
-    await api('PUT', '/api/admin/settings', payload);
+    await api('PUT', '/api/admin/settings', connPayload);
+  } catch (err) {
+    if (!err.isDemo) { toast('Error saving metrics settings', 'error'); return; }
+    connBlocked = true;
+  }
+  try {
+    await api('PUT', '/api/admin/settings', panelPayload);
+    metricsState.panelConfig = panelConfig;
+  } catch (err) {
+    if (!err.isDemo) toast('Error saving panel display', 'error');
+    return;
+  }
+  if (!connBlocked) {
     metricsState.nodeMappings = nodeMappings;
     metricsState.thresholds   = thresholds;
     metricsState.overrides    = overrides;
     metricsState.statusConfig = statusConfig;
-    metricsState.panelConfig  = panelConfig;
     toast('Metrics settings saved');
-  } catch (err) {
-    if (err.isDemo) return;
-    toast('Error saving metrics settings', 'error');
+  } else {
+    toast('Panel display saved');
   }
 });
 

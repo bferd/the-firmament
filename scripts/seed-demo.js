@@ -178,9 +178,21 @@ upsert.run('demo_borg_data', JSON.stringify({
   },
 }));
 
+// ── Settings: portal appearance ────────────────────────────────────────────
+upsert.run('footer_show_link', 'false');
+
+// ── Settings: welcome modal ────────────────────────────────────────────────
+upsert.run('welcome_modal_enabled',          'true');
+upsert.run('welcome_modal_title',            'Welcome to The Firmament Demo');
+upsert.run('welcome_modal_body',             'Feel free to explore! You can switch themes and toggle right panel display. To access the admin panel, log in with username: guest / password: guest');
+upsert.run('welcome_modal_button',           'Explore');
+upsert.run('welcome_modal_once_per_session', 'true');
+
 console.log('Done.');
 console.log(`  ${catDefs.length} categories: ${catDefs.map(c => c.name).join(', ')}`);
 console.log(`  ${svcDefs.length} services across all categories`);
 console.log('  4 node mappings: Tropus, Stratos, Mesos, Therm');
 console.log('  demo_metrics_data: 4 nodes, 8 containers, 5 storages');
 console.log('  demo_borg_data: 2 repos (main + offsite), both healthy');
+console.log('  footer_show_link: false');
+console.log('  welcome_modal: enabled with demo content');
