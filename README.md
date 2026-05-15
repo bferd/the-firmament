@@ -32,35 +32,6 @@ fully configurable admin panel.
 - Vanilla HTML/CSS/JS
 - Docker (two-stage build, ~400MB image)
 
-## Quick Start
-
-```bash
-git clone https://github.com/bferd/the-firmament
-cd the-firmament
-cp .env.example .env
-cp docker-compose.example.yml docker-compose.yml
-```
-
-Edit `.env` and fill in your values:
-- `AUTHELIA_URL` — your Authelia instance IP and port
-- `NPMPLUS_IP` — your NPMplus reverse proxy IP
-- `BIND_IP` — your server IP
-
-Make the same IP changes in `docker-compose.yml`.
-
-Then build and start:
-```bash
-# Create the data directory with correct permissions
-mkdir -p data
-sudo chown -R 1000:1000 data
-
-docker compose up -d --build
-```
-
-> **Admin is only accessible through your reverse proxy at `https://yourdomain.com/admin` — direct IP:port access is blocked by design. Authelia forward auth is enforced at the proxy level.**
-
-> **Note:** InfluxDB and Borg-UI tokens are configured through the admin panel at `/admin` — not in `.env`.
-
 ## Services Dashboard
 
 ![Services](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-services.png)
@@ -71,20 +42,6 @@ panel at `/admin` — protected by Authelia.
 Configure services, categories, theme, 
 metrics, backup status, and more without 
 touching any code.
-
-## Mobile
-
-
-<details>
-<summary>Mobile screenshot (click to expand)</summary>
-<img src="https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_fullpage.jpg" width="300" alt="Mobile Full Page">
-</details>
-
-The portal is fully responsive. On mobile 
-the hero works as on desktop. The services 
-section shows one card per row. The side 
-panel can be shown or hidden on mobile 
-via the admin panel.
 
 ## Admin Panel
 
@@ -99,31 +56,19 @@ via the admin panel.
 ### Layout Settings
 ![Admin Layout](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-layout.png)
 
-## Theming & Customization
+## Mobile
 
-Themes are fully configured through the admin panel — no CSS edits required for normal use. If you do customize the stylesheet directly, the primary and secondary accent colours use these CSS variables:
 
-| Variable | Description |
-|----------|-------------|
-| `--accent` | Primary accent colour (maps to `theme_accent_primary`) |
-| `--accent-rgb` | Comma-separated RGB of `--accent`, e.g. `0,229,255` |
-| `--accent2` | Secondary accent colour (maps to `theme_accent_secondary`) |
-| `--accent2-rgb` | Comma-separated RGB of `--accent2`, e.g. `139,92,246` |
+<details>
+<summary>Mobile screenshot (click to expand)</summary>
+<img src="https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_fullpage.jpg" width="300" alt="Mobile Full Page">
+</details>
 
-These are set at runtime by `applyTheme()` in `main.js`. Use them in custom CSS as `rgba(var(--accent-rgb), 0.4)` rather than hardcoding hex values, so your additions stay theme-aware.
-
-## Character Videos
-
-This repo does not include character videos.
-Generate your own using Higgsfield.ai or 
-similar AI video tools and place them in 
-the `/videos` directory:
-
-- `hero-welcome.webm` — plays once on load
-- `hero-idle-loop.webm` — loops on hero
-- `hero-transition.webm` — scroll trigger
-- `hero-browse-idle.webm` — side panel loop
-- `hero-background.mp4` — hero background
+The portal is fully responsive. On mobile 
+the hero works as on desktop. The services 
+section shows one card per row. The side 
+panel can be shown or hidden on mobile 
+via the admin panel.
 
 ## Requirements
 
@@ -210,6 +155,61 @@ The compose file expects these directories:
 The app runs on port 3000 internally. Bind it 
 to your server IP rather than 0.0.0.0 to avoid 
 exposing it beyond your local network.
+
+## Quick Start
+
+```bash
+git clone https://github.com/bferd/the-firmament
+cd the-firmament
+cp .env.example .env
+cp docker-compose.example.yml docker-compose.yml
+```
+
+Edit `.env` and fill in your values:
+- `AUTHELIA_URL` — your Authelia instance IP and port
+- `NPMPLUS_IP` — your NPMplus reverse proxy IP
+- `BIND_IP` — your server IP
+
+Make the same IP changes in `docker-compose.yml`.
+
+Then build and start:
+```bash
+# Create the data directory with correct permissions
+mkdir -p data
+sudo chown -R 1000:1000 data
+
+docker compose up -d --build
+```
+
+> **Admin is only accessible through your reverse proxy at `https://yourdomain.com/admin` — direct IP:port access is blocked by design. Authelia forward auth is enforced at the proxy level.**
+
+> **Note:** InfluxDB and Borg-UI tokens are configured through the admin panel at `/admin` — not in `.env`.
+
+## Theming & Customization
+
+Themes are fully configured through the admin panel — no CSS edits required for normal use. If you do customize the stylesheet directly, the primary and secondary accent colours use these CSS variables:
+
+| Variable | Description |
+|----------|-------------|
+| `--accent` | Primary accent colour (maps to `theme_accent_primary`) |
+| `--accent-rgb` | Comma-separated RGB of `--accent`, e.g. `0,229,255` |
+| `--accent2` | Secondary accent colour (maps to `theme_accent_secondary`) |
+| `--accent2-rgb` | Comma-separated RGB of `--accent2`, e.g. `139,92,246` |
+
+These are set at runtime by `applyTheme()` in `main.js`. Use them in custom CSS as `rgba(var(--accent-rgb), 0.4)` rather than hardcoding hex values, so your additions stay theme-aware.
+
+## Character Videos
+
+This repo does not include character videos.
+Generate your own using Higgsfield.ai or 
+similar AI video tools and place them in 
+the `/videos` directory:
+
+- `hero-welcome.webm` — plays once on load
+- `hero-idle-loop.webm` — loops on hero
+- `hero-transition.webm` — scroll trigger
+- `hero-browse-idle.webm` — side panel loop
+- `hero-background.mp4` — hero background
 
 ## Notes & Troubleshooting
 
