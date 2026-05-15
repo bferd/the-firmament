@@ -58,7 +58,6 @@ touching any code.
 
 ## Mobile
 
-
 <details>
 <summary>Mobile screenshot (click to expand)</summary>
 <img src="https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_fullpage.jpg" width="300" alt="Mobile Full Page">
@@ -73,40 +72,19 @@ via the admin panel.
 ## Requirements
 
 - Docker + Docker Compose
-- Authelia with a domain cookie and access rule for `/admin` (see Authelia Setup below)
+- Authelia with a domain cookie and access rule for `/admin` (see Setup below)
 - NPMplus (recommended — has built-in Authelia integration)
 - NPM or nginx (supported but requires manual Authelia auth_request configuration)
 - InfluxDB v2 with Proxmox metrics (optional)
 - Borg-UI (optional)
 
-## Authelia Setup
+## Setup
+
+### 1. Authelia
 
 Admin access is protected entirely at the proxy layer — no app-level auth is involved.
 
-### NPMplus Configuration
-
-The proxy host for your domain uses standard settings with no auth on the main entry. Authelia is applied only to `/admin` via a **Custom Location**, not to the whole domain.
-
-**Details tab:** Set the forward hostname/IP and port 3000, scheme HTTP, Access List: Publicly Accessible, Auth Request: none.
-
-**Custom Locations tab:** Add a location with path `= /admin`, forward to the same backend IP and port 3000, and set Auth Request to **authelia (modern)**. This locks `/admin` behind Authelia while leaving the rest of the portal public.
-
-No custom Advanced config or manual `auth_request` directives are needed.
-
-<table>
-<tr>
-<td><strong>Details tab</strong> — Auth Request: none on the main proxy host</td>
-<td><strong>Custom Locations tab</strong> — Auth Request: authelia (modern) on the /admin location</td>
-</tr>
-<tr>
-<td><img src="public/images/NPMplus_details.png" width="300"/></td>
-<td><img src="public/images/NPMplus_location.png" width="300"/></td>
-</tr>
-</table>
-
-### Authelia `configuration.yml`
-
-Add an access rule protecting `/admin`:
+Add an access rule protecting `/admin` in `configuration.yml`:
 
 ```yaml
 access_control:
@@ -128,10 +106,46 @@ session:
 
 No changes to `.env` are needed for auth — Authelia config lives entirely in `configuration.yml`.
 
-## Docker Compose Configuration
+### 2. NPMplus
 
-Before running, edit `docker-compose.yml` and 
-update these values for your setup:
+Authelia is applied only to `/admin` via a **Custom Location**, not to the whole domain.
+
+**Details tab:** Set the forward hostname/IP and port 3000, scheme HTTP, Access List: Publicly Accessible, Auth Request: none.
+
+**Custom Locations tab:** Add a location with path `= /admin`, forward to the same backend IP and port 3000, and set Auth Request to **authelia (modern)**. This locks `/admin` behind Authelia while leaving the rest of the portal public.
+
+No custom Advanced config or manual `auth_request` directives are needed.
+
+<table>
+<tr>
+<td><strong>Details tab</strong> — Auth Request: none on the main proxy host</td>
+<td><strong>Custom Locations tab</strong> — Auth Request: authelia (modern) on the /admin location</td>
+</tr>
+<tr>
+<td><img src="public/images/NPMplus_details.png" width="300"/></td>
+<td><img src="public/images/NPMplus_location.png" width="300"/></td>
+</tr>
+</table>
+
+### 3. Clone the repo
+
+```bash
+git clone https://github.com/bferd/the-firmament
+cd the-firmament
+cp .env.example .env
+cp docker-compose.example.yml docker-compose.yml
+```
+
+### 4. Configure .env
+
+Edit `.env` and fill in your values:
+- `AUTHELIA_URL` — your Authelia instance IP and port
+- `NPMPLUS_IP` — your NPMplus reverse proxy IP
+- `BIND_IP` — your server IP
+
+### 5. Configure docker-compose.yml
+
+Update these values for your setup:
 
 ```yaml
 ports:
@@ -142,39 +156,30 @@ environment:
   - NPMPLUS_IP=YOUR_NPMPLUS_IP                 # Your reverse proxy IP
 ```
 
-### Volumes
-
 The compose file expects these directories:
 - `./data/` — SQLite database (created automatically)
 - `./videos/` — Character and background videos (add your own)
 - `./fonts/` — Custom uploaded fonts (created automatically)
 - `./public/` — Static assets
 
-### Ports
+The app runs on port 3000 internally. Bind it to your server IP rather than 0.0.0.0 to avoid exposing it beyond your local network.
 
-The app runs on port 3000 internally. Bind it 
-to your server IP rather than 0.0.0.0 to avoid 
-exposing it beyond your local network.
+### 6. Add your videos
 
-## Quick Start
+This repo does not include character videos.
+Generate your own using Higgsfield.ai or 
+similar AI video tools and place them in 
+the `/videos` directory:
+
+- `hero-welcome.webm` — plays once on load
+- `hero-idle-loop.webm` — loops on hero
+- `hero-transition.webm` — scroll trigger
+- `hero-browse-idle.webm` — side panel loop
+- `hero-background.mp4` — hero background
+
+### 7. Build and start
 
 ```bash
-git clone https://github.com/bferd/the-firmament
-cd the-firmament
-cp .env.example .env
-cp docker-compose.example.yml docker-compose.yml
-```
-
-Edit `.env` and fill in your values:
-- `AUTHELIA_URL` — your Authelia instance IP and port
-- `NPMPLUS_IP` — your NPMplus reverse proxy IP
-- `BIND_IP` — your server IP
-
-Make the same IP changes in `docker-compose.yml`.
-
-Then build and start:
-```bash
-# Create the data directory with correct permissions
 mkdir -p data
 sudo chown -R 1000:1000 data
 
@@ -197,19 +202,6 @@ Themes are fully configured through the admin panel — no CSS edits required fo
 | `--accent2-rgb` | Comma-separated RGB of `--accent2`, e.g. `139,92,246` |
 
 These are set at runtime by `applyTheme()` in `main.js`. Use them in custom CSS as `rgba(var(--accent-rgb), 0.4)` rather than hardcoding hex values, so your additions stay theme-aware.
-
-## Character Videos
-
-This repo does not include character videos.
-Generate your own using Higgsfield.ai or 
-similar AI video tools and place them in 
-the `/videos` directory:
-
-- `hero-welcome.webm` — plays once on load
-- `hero-idle-loop.webm` — loops on hero
-- `hero-transition.webm` — scroll trigger
-- `hero-browse-idle.webm` — side panel loop
-- `hero-background.mp4` — hero background
 
 ## Notes & Troubleshooting
 
