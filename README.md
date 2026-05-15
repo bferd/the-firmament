@@ -12,11 +12,16 @@ fully configurable admin panel.
 
 - AI guardian character with scroll-driven video animations
 - Service card dashboard with full admin CRUD panel
+- Four card styles: glassmorphism, solid, minimal, bordered
 - Live Proxmox/InfluxDB node metrics in side panel
 - Borg-UI backup status integration
 - Authelia SSO forward auth integration
 - Auth-gated and offline-detection service cards
-- Full theme system with presets, colour pickers, font selector
+- Configurable welcome modal (title, body, button text)
+- Full theme system with presets, dual accent colours, colour pickers, font selector, card opacity
+- Custom font upload (.woff2/.woff/.ttf) for heading, body, and mono slots
+- ENGEL side panel with per-node and per-metric visibility controls
+- Character blend mode, status overlay, and mobile panel visibility controls
 - Mobile responsive
 - Docker deployment
 
@@ -85,7 +90,6 @@ touching any code.
 ## Mobile
 
 
-
 <img src="https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-mobile_fullpage.jpg" width="300" alt="Mobile Full Page">
 
 The portal is fully responsive. On mobile 
@@ -106,6 +110,21 @@ via the admin panel.
 
 ### Layout Settings
 ![Admin Layout](https://raw.githubusercontent.com/bferd/the-firmament/main/public/images/preview-layout.png)
+
+## Theming & Customization
+
+Themes are fully configured through the admin panel — no CSS edits required for normal use. If you do customize the stylesheet directly, the primary and secondary accent colours use these CSS variables:
+
+| Variable | Description |
+|----------|-------------|
+| `--accent` | Primary accent colour (maps to `theme_accent_primary`) |
+| `--accent-rgb` | Comma-separated RGB of `--accent`, e.g. `0,229,255` |
+| `--accent2` | Secondary accent colour (maps to `theme_accent_secondary`) |
+| `--accent2-rgb` | Comma-separated RGB of `--accent2`, e.g. `139,92,246` |
+
+These are set at runtime by `applyTheme()` in `main.js`. Use them in custom CSS as `rgba(var(--accent-rgb), 0.4)` rather than hardcoding hex values, so your additions stay theme-aware.
+
+> **Note:** These variables were renamed from `--cyan`/`--purple` in an earlier version. If you have local CSS overrides that reference `--cyan` or `--purple`, update them to `--accent` and `--accent2`.
 
 ## Character Videos
 
@@ -170,6 +189,22 @@ The compose file expects these directories:
 The app runs on port 3000 internally. Bind it 
 to your server IP rather than 0.0.0.0 to avoid 
 exposing it beyond your local network.
+
+## Notes & Troubleshooting
+
+### Proxmox Backup Server (PBS) node metrics
+
+PBS nodes expose memory differently from standard PVE nodes. A PBS node reports memory as a **float percentage (0–100)** rather than used/total bytes. Similarly, disk usage for PBS represents **datastore usage in GB**, not raw bytes like LXC/QEMU containers.
+
+To handle this correctly, add `"node_type": "pbs"` to the node mapping for any PBS node in the admin panel (Settings → InfluxDB → Node Mappings). PVE nodes do not need this field (it defaults to `"pve"`).
+
+```json
+{ "host": "proxmox-backup-server", "display": "PBS", "node_type": "pbs" }
+```
+
+Without this flag, PBS memory and disk values will be misread — memory will appear as a near-zero percentage and disk will be off by several orders of magnitude.
+
+---
 
 ## License
 

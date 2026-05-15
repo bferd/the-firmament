@@ -68,7 +68,7 @@ body::before {
 #hero-mask {
   position: absolute;
   inset: 0;
-  background: #04080f;
+  background: var(--bg);
   z-index: 100;
   display: flex;
   align-items: center;
@@ -91,7 +91,7 @@ body::before {
   width: 48px;
   height: 48px;
   border: 2px solid rgba(var(--accent2-rgb, 139, 92, 246), 0.18);
-  border-top-color: var(--accent2, #8b5cf6);
+  border-top-color: var(--accent2);
   border-radius: 50%;
   animation: spin 1s linear infinite, throbberGlow 2s ease-in-out infinite;
   margin: 0 auto 1rem;
@@ -201,8 +201,8 @@ body::before {
   border-radius: 50%;
   background: radial-gradient(
     ellipse at center,
-    rgba(0, 229, 255, 0.07) 0%,
-    rgba(0, 229, 255, 0.02) 40%,
+    rgba(var(--accent-rgb, 0, 229, 255), 0.07) 0%,
+    rgba(var(--accent-rgb, 0, 229, 255), 0.02) 40%,
     transparent 70%
   );
   pointer-events: none;
@@ -336,7 +336,7 @@ body::before {
   z-index: 100;
   transform: translateX(100%);
   transition: transform var(--transition);
-  box-shadow: -8px 0 40px rgba(0, 229, 255, 0.04);
+  box-shadow: -8px 0 40px rgba(var(--accent-rgb, 0, 229, 255), 0.04);
 }
 
 #engel-panel.visible {
@@ -432,7 +432,7 @@ body::before {
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
-  scrollbar-color: rgba(0,229,255,0.3) transparent;
+  scrollbar-color: rgba(var(--accent-rgb, 0, 229, 255), 0.3) transparent;
 }
 
 #panel-metrics-wrap::-webkit-scrollbar {
@@ -442,7 +442,7 @@ body::before {
   background: transparent;
 }
 #panel-metrics-wrap::-webkit-scrollbar-thumb {
-  background: rgba(0,229,255,0.3);
+  background: rgba(var(--accent-rgb, 0, 229, 255), 0.3);
 }
 
 #panel-status-line {
@@ -460,7 +460,7 @@ body::before {
 }
 
 .panel-node-entry {
-  border-top: 1px solid rgba(0, 229, 255, 0.08);
+  border-top: 1px solid rgba(var(--accent-rgb, 0, 229, 255), 0.08);
   padding-top: 0.4rem;
 }
 
@@ -829,7 +829,7 @@ body::before {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.5rem;
   letter-spacing: 0.15em;
-  color: var(--accent2, #8b5cf6);
+  color: var(--accent2);
   text-transform: uppercase;
 }
 
@@ -900,7 +900,7 @@ body::before {
 .footer-notice a:hover { opacity: 1; }
 
 .footer-notice a.footer-brad:hover {
-  text-shadow: 0 0 12px var(--accent), 0 0 24px rgba(0, 229, 255, 0.4);
+  text-shadow: 0 0 12px var(--accent), 0 0 24px rgba(var(--accent-rgb, 0, 229, 255), 0.4);
 }
 
 /* ── Transition video overlay ────────────────────────────────────────────── */
@@ -930,8 +930,8 @@ body::before {
 /* ── Scrollbar ────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.2); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(0, 229, 255, 0.4); }
+::-webkit-scrollbar-thumb { background: rgba(var(--accent-rgb, 0, 229, 255), 0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(var(--accent-rgb, 0, 229, 255), 0.4); }
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
@@ -1082,7 +1082,7 @@ body.has-announcement {
 .welcome-modal-content {
   position: relative;
   z-index: 1;
-  background: rgba(6, 13, 24, 0.95);
+  background: rgba(var(--bg2-rgb, 6, 13, 24), 0.95);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 2.5rem 2rem;
@@ -1090,7 +1090,7 @@ body.has-announcement {
   width: 90%;
   text-align: center;
   backdrop-filter: blur(20px);
-  box-shadow: 0 0 60px rgba(0, 229, 255, 0.08), 0 20px 60px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 60px rgba(var(--accent-rgb, 0, 229, 255), 0.08), 0 20px 60px rgba(0, 0, 0, 0.6);
 }
 
 .welcome-modal-content::before {
@@ -1125,7 +1125,7 @@ body.has-announcement {
 
 #welcome-modal-btn {
   background: var(--accent);
-  color: #000;
+  color: var(--bg);
   border: none;
   border-radius: 6px;
   padding: 0.7rem 2rem;
@@ -1201,7 +1201,7 @@ body.panel-left #engel-panel {
   border-left: none;
   border-right: 1px solid var(--border);
   transform: translateX(-100%);
-  box-shadow: 8px 0 40px rgba(0, 229, 255, 0.04);
+  box-shadow: 8px 0 40px rgba(var(--accent-rgb, 0, 229, 255), 0.04);
 }
 
 body.panel-left #engel-panel.visible {
