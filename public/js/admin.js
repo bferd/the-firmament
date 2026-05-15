@@ -1480,8 +1480,8 @@ async function applyAdminTheme() {
 
     if (theme.theme_bg_primary)        root.style.setProperty('--bg',       theme.theme_bg_primary);
     if (theme.theme_bg_secondary)      root.style.setProperty('--bg2',      theme.theme_bg_secondary);
-    if (theme.theme_accent_primary)    root.style.setProperty('--cyan',     theme.theme_accent_primary);
-    if (theme.theme_accent_secondary)  root.style.setProperty('--purple',   theme.theme_accent_secondary);
+    if (theme.theme_accent_primary)    root.style.setProperty('--accent',   theme.theme_accent_primary);
+    if (theme.theme_accent_secondary)  root.style.setProperty('--accent2',  theme.theme_accent_secondary);
     if (theme.theme_text_primary)      root.style.setProperty('--text',     theme.theme_text_primary);
     if (theme.theme_text_dim)          root.style.setProperty('--text-dim', theme.theme_text_dim);
 
@@ -1497,11 +1497,12 @@ async function applyAdminTheme() {
     }
     if (theme.theme_accent_primary) {
       const acc = hexToRgb(theme.theme_accent_primary);
+      root.style.setProperty('--accent-rgb', `${acc.r},${acc.g},${acc.b}`);
       root.style.setProperty('--border', `rgba(${acc.r},${acc.g},${acc.b},0.12)`);
     }
     if (theme.theme_accent_secondary) {
-      const purp = hexToRgb(theme.theme_accent_secondary);
-      root.style.setProperty('--purple-rgb', `${purp.r},${purp.g},${purp.b}`);
+      const acc2 = hexToRgb(theme.theme_accent_secondary);
+      root.style.setProperty('--accent2-rgb', `${acc2.r},${acc2.g},${acc2.b}`);
     }
 
     // Scanlines
@@ -2123,6 +2124,7 @@ async function loadSettings() {
 // ── Init ───────────────────────────────────────────────────────────────────
 (async () => {
   try {
+    await applyAdminTheme();
     await loadCategories();
     await loadServices();
     await loadSettings();
@@ -2145,7 +2147,6 @@ async function loadSettings() {
     await Promise.all([loadVideos(), loadFonts(), loadFaviconSection()]);
 
     showPanel('live-metrics');
-    applyAdminTheme();
   } catch (err) {
     if (err.message === 'Unauthorised') {
       document.body.innerHTML =

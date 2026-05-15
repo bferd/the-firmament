@@ -437,7 +437,7 @@ function showVideoErrorMessage(mask, onContinue) {
     'border:1px solid var(--border)',
     'border-radius:4px',
     'font-family:var(--font-mono)',
-    'color:var(--cyan)',
+    'color:var(--accent)',
     'max-width:380px',
     'text-align:center',
   ].join(';');
@@ -454,7 +454,7 @@ function showVideoErrorMessage(mask, onContinue) {
   btn.style.cssText = [
     'margin-top:0.25rem',
     'padding:0.6rem 1.5rem',
-    'background:var(--cyan)',
+    'background:var(--accent)',
     'color:var(--bg)',
     'border:none',
     'border-radius:2px',
@@ -1135,20 +1135,20 @@ async function applyTheme() {
     // Colour vars
     if (theme.theme_bg_primary)     root.style.setProperty('--bg',  theme.theme_bg_primary);
     if (theme.theme_bg_secondary)   root.style.setProperty('--bg2', theme.theme_bg_secondary);
-    if (theme.theme_accent_primary) root.style.setProperty('--cyan', theme.theme_accent_primary);
+    if (theme.theme_accent_primary) root.style.setProperty('--accent', theme.theme_accent_primary);
     if (theme.theme_text_primary)   root.style.setProperty('--text', theme.theme_text_primary);
     if (theme.theme_text_dim)       root.style.setProperty('--text-dim', theme.theme_text_dim);
 
     // Derived vars
     const accentRgb = hexToRgb(theme.theme_accent_primary);
     if (accentRgb) {
-      root.style.setProperty('--cyan-rgb', `${accentRgb.r},${accentRgb.g},${accentRgb.b}`);
+      root.style.setProperty('--accent-rgb', `${accentRgb.r},${accentRgb.g},${accentRgb.b}`);
       root.style.setProperty('--border', `rgba(${accentRgb.r},${accentRgb.g},${accentRgb.b},0.12)`);
     }
     if (theme.theme_accent_secondary) {
-      root.style.setProperty('--purple', theme.theme_accent_secondary);
-      const purpleRgb = hexToRgb(theme.theme_accent_secondary);
-      if (purpleRgb) root.style.setProperty('--purple-rgb', `${purpleRgb.r},${purpleRgb.g},${purpleRgb.b}`);
+      root.style.setProperty('--accent2', theme.theme_accent_secondary);
+      const accent2Rgb = hexToRgb(theme.theme_accent_secondary);
+      if (accent2Rgb) root.style.setProperty('--accent2-rgb', `${accent2Rgb.r},${accent2Rgb.g},${accent2Rgb.b}`);
     }
     const bg2Rgb     = hexToRgb(theme.theme_bg_secondary);
     const cardOpacity = parseFloat(theme.theme_card_opacity) || 0.85;

@@ -2,7 +2,7 @@
 :root {
   --bg:       #04080f;
   --bg2:      #060d18;
-  --cyan:     #00e5ff;
+  --accent:   #00e5ff;
   --white:    #ffffff;
   --text:     #c9d6e3;
   --text-dim: #5a7a99;
@@ -19,8 +19,8 @@
   --font-body:     'Inter', 'Segoe UI', system-ui, sans-serif;
   --font-mono:     'Share Tech Mono', monospace;
   --font-mono-alt: 'JetBrains Mono', monospace;
-  /* --purple is the secondary accent colour (theme_accent_secondary) */
-  --purple: #8b5cf6;
+  /* --accent2 is the secondary accent colour (theme_accent_secondary) */
+  --accent2: #8b5cf6;
 }
 
 /* ── Reset ──────────────────────────────────────────────────────────────── */
@@ -90,8 +90,8 @@ body::before {
 .throbber-ring {
   width: 48px;
   height: 48px;
-  border: 2px solid rgba(var(--purple-rgb, 139, 92, 246), 0.18);
-  border-top-color: var(--purple, #8b5cf6);
+  border: 2px solid rgba(var(--accent2-rgb, 139, 92, 246), 0.18);
+  border-top-color: var(--accent2, #8b5cf6);
   border-radius: 50%;
   animation: spin 1s linear infinite, throbberGlow 2s ease-in-out infinite;
   margin: 0 auto 1rem;
@@ -101,7 +101,7 @@ body::before {
   font-family: 'Share Tech Mono', monospace;
   font-size: 0.65rem;
   letter-spacing: 0.4em;
-  color: rgba(var(--purple-rgb, 139, 92, 246), 0.6);
+  color: rgba(var(--accent2-rgb, 139, 92, 246), 0.6);
   text-transform: uppercase;
   animation: throbberPulse 2s ease-in-out infinite;
 }
@@ -116,8 +116,8 @@ body::before {
 }
 
 @keyframes throbberGlow {
-  0%, 100% { filter: drop-shadow(0 0 4px rgba(var(--purple-rgb, 139, 92, 246), 0.4)); }
-  50%       { filter: drop-shadow(0 0 10px rgba(var(--purple-rgb, 139, 92, 246), 0.8)); }
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(var(--accent2-rgb, 139, 92, 246), 0.4)); }
+  50%       { filter: drop-shadow(0 0 10px rgba(var(--accent2-rgb, 139, 92, 246), 0.8)); }
 }
 
 /* ── Hero Section ────────────────────────────────────────────────────────── */
@@ -151,7 +151,7 @@ body::before {
   position: absolute;
   width: 80px;
   height: 80px;
-  border-color: var(--purple);
+  border-color: var(--accent2);
   border-style: solid;
   opacity: var(--corner-brackets-opacity, 0.35);
   z-index: 2;
@@ -174,7 +174,7 @@ body::before {
   position: absolute;
   width: 80px;
   height: 80px;
-  border-color: var(--purple);
+  border-color: var(--accent2);
   border-style: solid;
   opacity: var(--corner-brackets-opacity, 0.35);
   z-index: 2;
@@ -225,8 +225,8 @@ body::before {
   font-weight: 900;
   letter-spacing: 0.35em;
   margin-right: -0.35em;
-  color: var(--white);
-  text-shadow: 0 0 20px rgba(0, 229, 255, 0.9), 0 0 60px rgba(0, 229, 255, 0.5), 0 2px 4px rgba(0,0,0,0.9);
+  color: var(--text);
+  text-shadow: 0 0 20px rgba(var(--accent-rgb, 0, 229, 255), 0.9), 0 0 60px rgba(var(--accent-rgb, 0, 229, 255), 0.5), 0 2px 4px rgba(0,0,0,0.9);
   line-height: 1;
 }
 
@@ -235,7 +235,7 @@ body::before {
   font-size: clamp(0.65rem, 1.5vw, 0.85rem);
   letter-spacing: 0.4em;
   margin-right: -0.4em;
-  color: var(--purple);
+  color: var(--accent2);
   text-transform: uppercase;
   margin-top: 0.6rem;
   opacity: 0.9;
@@ -302,14 +302,14 @@ body::before {
   font-size: 0.65rem;
   letter-spacing: 0.3em;
   margin-right: -0.3em;
-  color: var(--purple);
+  color: var(--accent2);
   text-transform: uppercase;
 }
 
 .scroll-hint svg {
   width: 20px;
   height: 20px;
-  stroke: var(--purple);
+  stroke: var(--accent2);
   fill: none;
   stroke-width: 1.5;
   stroke-linecap: round;
@@ -328,7 +328,7 @@ body::before {
   right: 0;
   width: var(--panel-w);
   height: 100vh;
-  background: linear-gradient(180deg, #000 0%, var(--bg2) 100%);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
   border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -352,10 +352,12 @@ body::before {
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.35em;
-  color: var(--cyan);
-  opacity: 0.4;
+  color: var(--accent);
+  opacity: 0.7;
   margin-top: auto;
   margin-bottom: 0.4rem;
+  text-shadow: 0 0 12px rgba(var(--accent-rgb, 0, 229, 255), 0.6),
+               0 0 24px rgba(var(--accent-rgb, 0, 229, 255), 0.3);
 }
 
 /* panel-site-title matches panel-engel-name exactly */
@@ -363,8 +365,10 @@ body::before {
   font-size: 0.6rem !important;
   font-weight: 700 !important;
   letter-spacing: 0.35em !important;
-  opacity: 0.4 !important;
+  opacity: 0.7 !important;
   margin-top: 0.2rem;
+  text-shadow: 0 0 12px rgba(var(--accent-rgb, 0, 229, 255), 0.6),
+               0 1px 3px rgba(0, 0, 0, 0.6) !important;
 }
 
 .panel-label {
@@ -372,7 +376,7 @@ body::before {
   font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.3em;
-  color: var(--cyan);
+  color: var(--accent);
   margin-top: 0.5rem;
   opacity: 0.7;
 }
@@ -392,8 +396,8 @@ body::before {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--cyan);
-  box-shadow: 0 0 8px var(--cyan);
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
   margin-right: 0.4rem;
   animation: pulse 2s ease-in-out infinite;
   flex-shrink: 0;
@@ -465,7 +469,7 @@ body::before {
   font-size: 0.55rem;
   font-weight: 700;
   letter-spacing: 0.25em;
-  color: var(--cyan);
+  color: var(--accent);
   opacity: 0.8;
   margin-bottom: 0.2rem;
   position: relative;
@@ -478,7 +482,7 @@ body::before {
   left: 0;
   bottom: calc(100% + 4px);
   background: var(--bg3, #0a1628);
-  border: 1px solid rgba(var(--cyan-rgb, 0, 229, 255), 0.25);
+  border: 1px solid rgba(var(--accent-rgb, 0, 229, 255), 0.25);
   color: var(--text);
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.6rem;
@@ -531,7 +535,7 @@ body::before {
   font-size: 0.55rem;
   font-weight: 700;
   letter-spacing: 0.25em;
-  color: var(--cyan);
+  color: var(--accent);
   opacity: 0.8;
   text-transform: uppercase;
   margin-bottom: 0.2rem;
@@ -549,8 +553,8 @@ body::before {
 }
 
 .panel-backup-dot                { flex-shrink: 0; }
-.panel-backup-dot.healthy        { color: var(--cyan); }
-.panel-backup-dot.running        { color: var(--cyan); animation: pulse 1.5s infinite; }
+.panel-backup-dot.healthy        { color: var(--accent); }
+.panel-backup-dot.running        { color: var(--accent); animation: pulse 1.5s infinite; }
 .panel-backup-dot.warning        { color: #fb923c; }
 .panel-backup-dot.failed         { color: #ef4444; animation: backup-pulse 1.4s ease-in-out infinite; }
 .panel-backup-dot.unavailable    { color: var(--text-dim); }
@@ -599,9 +603,9 @@ body::before {
   font-size: 1.1rem;
   font-weight: 900;
   letter-spacing: 0.2em;
-  color: var(--white);
+  color: var(--text);
   text-decoration: none;
-  text-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+  text-shadow: 0 0 20px rgba(var(--accent-rgb, 0, 229, 255), 0.4);
 }
 
 .site-tagline {
@@ -633,7 +637,7 @@ body::before {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.6rem;
   letter-spacing: 0.2em;
-  color: var(--cyan);
+  color: var(--accent);
   text-transform: uppercase;
   display: flex;
   align-items: center;
@@ -649,11 +653,11 @@ body::before {
 }
 
 #auth-user-link:hover {
-  color: var(--cyan);
+  color: var(--accent);
 }
 
 .auth-separator {
-  color: var(--cyan);
+  color: var(--accent);
   margin: 0 0.5rem;
   font-size: 0.5em;
   vertical-align: middle;
@@ -670,7 +674,7 @@ body::before {
 }
 
 #logout-link:hover {
-  color: var(--cyan);
+  color: var(--accent);
   opacity: 1;
 }
 
@@ -751,14 +755,14 @@ body::before {
   left: 0;
   right: 0;
   height: 2px;
-  background: var(--accent, var(--cyan));
+  background: var(--accent, var(--accent));
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
 .service-card:hover {
-  border-color: var(--cyan) !important;
-  box-shadow: 0 0 20px rgba(var(--cyan-rgb, 0, 229, 255), 0.15) !important,
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 20px rgba(var(--accent-rgb, 0, 229, 255), 0.15) !important,
               0 4px 20px rgba(0, 0, 0, 0.4);
   transform: translateY(-2px);
   background: rgba(var(--bg2-rgb, 6, 13, 24), 0.95);
@@ -781,7 +785,7 @@ body::before {
 .service-name {
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--white);
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -817,7 +821,7 @@ body::before {
   display: none;
 }
 
-/* --purple (secondary accent) used here intentionally */
+/* --accent2 (secondary accent) used here intentionally */
 .service-auth-tag {
   position: absolute;
   top: 0.35rem;
@@ -825,7 +829,7 @@ body::before {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.5rem;
   letter-spacing: 0.15em;
-  color: var(--purple, #8b5cf6);
+  color: var(--accent2, #8b5cf6);
   text-transform: uppercase;
 }
 
@@ -856,8 +860,8 @@ body::before {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--cyan);
-  box-shadow: 0 0 6px var(--cyan);
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
   vertical-align: middle;
   margin-right: 0.3rem;
   position: relative;
@@ -887,7 +891,7 @@ body::before {
 }
 
 .footer-notice a {
-  color: var(--cyan);
+  color: var(--accent);
   text-decoration: none;
   opacity: 0.7;
   transition: opacity 0.2s;
@@ -896,7 +900,7 @@ body::before {
 .footer-notice a:hover { opacity: 1; }
 
 .footer-notice a.footer-brad:hover {
-  text-shadow: 0 0 12px var(--cyan), 0 0 24px rgba(0, 229, 255, 0.4);
+  text-shadow: 0 0 12px var(--accent), 0 0 24px rgba(0, 229, 255, 0.4);
 }
 
 /* ── Transition video overlay ────────────────────────────────────────────── */
@@ -1096,7 +1100,7 @@ body.has-announcement {
   left: 0;
   right: 0;
   height: 2px;
-  background: var(--cyan);
+  background: var(--accent);
   border-radius: 12px 12px 0 0;
   opacity: 0.6;
 }
@@ -1106,7 +1110,7 @@ body.has-announcement {
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.2em;
-  color: var(--cyan);
+  color: var(--accent);
   text-transform: uppercase;
   margin-bottom: 1.25rem;
 }
@@ -1120,7 +1124,7 @@ body.has-announcement {
 }
 
 #welcome-modal-btn {
-  background: var(--cyan);
+  background: var(--accent);
   color: #000;
   border: none;
   border-radius: 6px;
@@ -1136,8 +1140,8 @@ body.has-announcement {
 }
 
 #welcome-modal-btn:hover {
-  background: #33ecff;
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+  box-shadow: 0 0 16px rgba(var(--accent2-rgb, 139, 92, 246), 0.5);
+  filter: brightness(1.15);
 }
 
 /* ── Card style variants ─────────────────────────────────────────────────── */
@@ -1177,7 +1181,7 @@ body.card-style-bordered .service-card {
 
 [data-card-style="bordered"] .service-card:hover,
 body.card-style-bordered .service-card:hover {
-  border-color: var(--accent, var(--cyan)) !important;
+  border-color: var(--accent, var(--accent)) !important;
 }
 
 /* ── Layout helpers ──────────────────────────────────────────────────────── */
@@ -1222,7 +1226,7 @@ body.panel-left #services {
   font-size: 0.7rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  border-bottom: 1px solid rgba(var(--cyan-rgb, 0, 229, 255), 0.15);
+  border-bottom: 1px solid rgba(var(--accent-rgb, 0, 229, 255), 0.15);
   margin-bottom: 0.5rem;
 }
 
