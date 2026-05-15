@@ -45,23 +45,8 @@ Edit `.env` and fill in your values:
 - `AUTHELIA_URL` — your Authelia instance IP and port
 - `NPMPLUS_IP` — your NPMplus reverse proxy IP
 - `BIND_IP` — your server IP
-- `PROXY_SECRET` — generate a random secret (see below)
 
-Make the same IP and PROXY_SECRET changes in `docker-compose.yml`.
-
-Generate a secure PROXY_SECRET:
-```bash
-openssl rand -hex 32
-```
-
-Then add the same value to your NPMplus Advanced config for the schroth.ca proxy host:
-```nginx
-proxy_set_header X-Proxy-Secret your-generated-secret;
-```
-
-> **Security note:** PROXY_SECRET prevents admin API bypass. 
-> Without it any device on your LAN could access the admin 
-> API directly without going through Authelia.
+Make the same IP changes in `docker-compose.yml`.
 
 Then build and start:
 ```bash
@@ -72,7 +57,7 @@ sudo chown -R 1000:1000 data
 docker compose up -d --build
 ```
 
-Then visit `http://your-server-ip:3000`
+> **Admin is only accessible through your reverse proxy at `https://yourdomain.com/admin` — direct IP:port access is blocked by design. Authelia forward auth is enforced at the proxy level.**
 
 > **Note:** InfluxDB and Borg-UI tokens are configured through the admin panel at `/admin` — not in `.env`.
 
@@ -124,8 +109,6 @@ Themes are fully configured through the admin panel — no CSS edits required fo
 
 These are set at runtime by `applyTheme()` in `main.js`. Use them in custom CSS as `rgba(var(--accent-rgb), 0.4)` rather than hardcoding hex values, so your additions stay theme-aware.
 
-> **Note:** These variables were renamed from `--cyan`/`--purple` in an earlier version. If you have local CSS overrides that reference `--cyan` or `--purple`, update them to `--accent` and `--accent2`.
-
 ## Character Videos
 
 This repo does not include character videos.
@@ -142,11 +125,60 @@ the `/videos` directory:
 ## Requirements
 
 - Docker + Docker Compose
-- Authelia (for admin auth)
+- Authelia with a domain cookie and access rule for `/admin` (see Authelia Setup below)
 - NPMplus (recommended — has built-in Authelia integration)
 - NPM or nginx (supported but requires manual Authelia auth_request configuration)
 - InfluxDB v2 with Proxmox metrics (optional)
 - Borg-UI (optional)
+
+## Authelia Setup
+
+Admin access is protected entirely at the proxy layer — no app-level auth is involved.
+
+### NPMplus Configuration
+
+The proxy host for your domain uses standard settings with no auth on the main entry. Authelia is applied only to `/admin` via a **Custom Location**, not to the whole domain.
+
+**Details tab:** Set the forward hostname/IP and port 3000, scheme HTTP, Access List: Publicly Accessible, Auth Request: none.
+
+**Custom Locations tab:** Add a location with path `= /admin`, forward to the same backend IP and port 3000, and set Auth Request to **authelia (modern)**. This locks `/admin` behind Authelia while leaving the rest of the portal public.
+
+No custom Advanced config or manual `auth_request` directives are needed.
+
+<table>
+<tr>
+<td><strong>Details tab</strong> — Auth Request: none on the main proxy host</td>
+<td><strong>Custom Locations tab</strong> — Auth Request: authelia (modern) on the /admin location</td>
+</tr>
+<tr>
+<td><img src="public/images/NPMplus_details.png" width="300"/></td>
+<td><img src="public/images/NPMplus_location.png" width="300"/></td>
+</tr>
+</table>
+
+### Authelia `configuration.yml`
+
+Add an access rule protecting `/admin`:
+
+```yaml
+access_control:
+  rules:
+    - domain: yourdomain.com
+      resources:
+        - "^/admin.*$"
+      policy: one_factor
+```
+
+Make sure your `session` cookies block uses the same domain:
+
+```yaml
+session:
+  cookies:
+    - domain: yourdomain.com
+      authelia_url: https://auth.yourdomain.com
+```
+
+No changes to `.env` are needed for auth — Authelia config lives entirely in `configuration.yml`.
 
 ## Docker Compose Configuration
 
@@ -160,20 +192,6 @@ ports:
 environment:
   - AUTHELIA_URL=http://YOUR_AUTHELIA_IP:9091  # Your Authelia instance
   - NPMPLUS_IP=YOUR_NPMPLUS_IP                 # Your reverse proxy IP
-  - PROXY_SECRET=your-random-secret-here       # Generate a random string
-```
-
-### PROXY_SECRET
-
-Generate a secure random secret:
-```bash
-openssl rand -hex 32
-```
-
-Use the same value in both `docker-compose.yml` 
-and your reverse proxy Advanced config:
-```nginx
-proxy_set_header X-Proxy-Secret your-secret-here;
 ```
 
 ### Volumes
