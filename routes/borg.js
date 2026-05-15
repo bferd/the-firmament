@@ -4,6 +4,8 @@ const express = require('express');
 const router  = express.Router();
 const db      = require('../database/db');
 
+const DEMO_MODE = process.env.DEMO_MODE === 'true';
+
 let borgCache = { data: null, ts: 0 };
 
 function parseJSON(str, fallback) {
@@ -236,6 +238,12 @@ async function fetchBorgStatus(settings) {
 router.get('/api/borg-status', async (req, res) => {
   const rows     = db.prepare('SELECT key, value FROM settings').all();
   const settings = Object.fromEntries(rows.map(r => [r.key, r.value]));
+
+  if (DEMO_MODE && settings.demo_borg_data) {
+    const demo = parseJSON(settings.demo_borg_data, null);
+    if (demo) return res.json(demo);
+  }
+
   try {
     res.json(await fetchBorgStatus(settings));
   } catch (err) {

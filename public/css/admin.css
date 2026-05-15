@@ -489,6 +489,7 @@ body::before {
 
 .toast.success { border-left: 3px solid var(--success); }
 .toast.error   { border-left: 3px solid var(--danger); }
+.toast.info    { border-left: 3px solid #fbbf24; }
 
 @keyframes toastIn {
   from { opacity: 0; transform: translateX(20px); }
@@ -1214,4 +1215,54 @@ tr.metrics-warn td { background: rgba(239,68,68,0.04); }
 a.btn {
   display: inline-flex;
   text-decoration: none;
+}
+
+/* ── Demo mode banner ────────────────────────────────────────────────────── */
+#demo-banner {
+  background: rgba(251, 191, 36, 0.07);
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  border-radius: 8px;
+  padding: 0.7rem 1.25rem;
+  margin-bottom: 1.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: #fbbf24;
+}
+
+.demo-tag {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  padding: 0.22rem 0.6rem;
+  border-radius: 3px;
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  background: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+/* ── Demo mode — disable destructive UI elements ─────────────────────────── */
+body.demo-mode .btn-danger,
+body.demo-mode #btn-import-settings,
+body.demo-mode input[type="file"] {
+  opacity: 0.3;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+body.demo-mode label.btn[for^="mf-"],
+body.demo-mode label.btn[for^="ff-"],
+body.demo-mode label.btn[for^="fav-file-"],
+body.demo-mode button[id^="mub-"],
+body.demo-mode button[id^="fub-"],
+body.demo-mode button[id^="fav-upload-"] {
+  opacity: 0.3;
+  pointer-events: none;
+  cursor: not-allowed;
 }

@@ -15,6 +15,7 @@ if (catCount === 0) {
   require('./database/seed');
 }
 
+const DEMO_MODE    = process.env.DEMO_MODE === 'true';
 const AUTHELIA_URL = process.env.AUTHELIA_URL || 'http://192.168.1.156:9091';
 const PROXY_IP     = process.env.NPMPLUS_IP   || '192.168.1.164';
 
@@ -428,8 +429,22 @@ app.get('/api/services', async (req, res) => {
   res.json(rows);
 });
 
+// ── Demo mode ─────────────────────────────────────────────────────────────
+app.get('/api/demo-mode', (req, res) => {
+  res.json({ demo: DEMO_MODE });
+});
+
 // ── Admin API — all routes require auth ────────────────────────────────────
 app.use('/api/admin', requireAuth);
+
+if (DEMO_MODE) {
+  app.use('/api/admin', (req, res, next) => {
+    if (req.method !== 'GET') {
+      return res.status(403).json({ error: 'Demo mode — changes are not saved' });
+    }
+    next();
+  });
+}
 
 // Settings
 app.get('/api/admin/settings', (req, res) => {

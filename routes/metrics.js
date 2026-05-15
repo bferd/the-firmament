@@ -5,6 +5,8 @@ const router             = express.Router();
 const db                 = require('../database/db');
 const { fetchBorgStatus } = require('./borg');
 
+const DEMO_MODE = process.env.DEMO_MODE === 'true';
+
 let cache = { data: null, ts: 0 };
 
 function parseJSON(str, fallback) {
@@ -284,6 +286,16 @@ const STORAGE_QUERY = (bucket) => `from(bucket: "${escapeFlux(bucket)}")
 router.get('/api/metrics', async (req, res) => {
   const rows     = db.prepare('SELECT key, value FROM settings').all();
   const settings = Object.fromEntries(rows.map(r => [r.key, r.value]));
+
+  if (DEMO_MODE && settings.demo_metrics_data) {
+    const demo = parseJSON(settings.demo_metrics_data, null);
+    if (demo) return res.json({
+      ...demo,
+      last_updated: new Date().toISOString(),
+      panel_config: parseJSON(settings.influxdb_panel_config || '{}', {}),
+      thresholds:   parseJSON(settings.influxdb_thresholds   || '{}', {}),
+    });
+  }
 
   const token = settings.influxdb_token || '';
   if (!token) return res.json({ status: 'unconfigured' });

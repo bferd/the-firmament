@@ -19,6 +19,17 @@ async function api(method, url, body) {
     toast('Not authenticated — please log in via Authelia and reload', 'error');
     throw new Error('Unauthorised');
   }
+  if (res.status === 403) {
+    let errData = {};
+    try { errData = await res.json(); } catch (_) {}
+    if ((errData.error || '').includes('Demo mode')) {
+      toast("Demo mode — changes aren't saved, but feel free to explore!", 'info');
+      const demoErr = new Error(errData.error);
+      demoErr.isDemo = true;
+      throw demoErr;
+    }
+    throw new Error(errData.error || `HTTP 403`);
+  }
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
@@ -125,7 +136,8 @@ async function deleteCategory(id) {
     toast('Category deleted');
     await loadCategories();
     await loadServices();
-  } catch (e) {
+  } catch (err) {
+    if (err.isDemo) return;
     toast('Error deleting category', 'error');
   }
 }
@@ -147,6 +159,7 @@ document.getElementById('add-cat-form').addEventListener('submit', async (e) => 
     document.getElementById('new-cat-colour').value = '#00e5ff';
     await loadCategories();
   } catch (err) {
+    if (err.isDemo) return;
     toast('Error adding category', 'error');
   }
 });
@@ -166,6 +179,7 @@ document.getElementById('edit-cat-form').addEventListener('submit', async (e) =>
     await loadCategories();
     await loadServices();
   } catch (err) {
+    if (err.isDemo) return;
     toast('Error updating category', 'error');
   }
 });
@@ -255,7 +269,8 @@ async function deleteService(id) {
     await api('DELETE', `/api/admin/services/${id}`);
     toast('Service deleted');
     await loadServices();
-  } catch (e) {
+  } catch (err) {
+    if (err.isDemo) return;
     toast('Error', 'error');
   }
 }
@@ -286,6 +301,7 @@ document.getElementById('add-svc-form').addEventListener('submit', async (e) => 
     document.getElementById('new-svc-accent').value = '#00e5ff';
     await loadServices();
   } catch (err) {
+    if (err.isDemo) return;
     toast('Error adding service', 'error');
   }
 });
@@ -313,6 +329,7 @@ document.getElementById('edit-svc-form').addEventListener('submit', async (e) =>
     document.getElementById('edit-svc-form').style.display = 'none';
     await loadServices();
   } catch (err) {
+    if (err.isDemo) return;
     toast('Error', 'error');
   }
 });
@@ -794,6 +811,7 @@ document.getElementById('metrics-settings-form').addEventListener('submit', asyn
     metricsState.panelConfig  = panelConfig;
     toast('Metrics settings saved');
   } catch (err) {
+    if (err.isDemo) return;
     toast('Error saving metrics settings', 'error');
   }
 });
@@ -815,6 +833,7 @@ document.getElementById('borg-settings-form').addEventListener('submit', async (
     });
     toast('Backup settings saved');
   } catch (err) {
+    if (err.isDemo) return;
     toast('Error saving backup settings', 'error');
   }
 });
@@ -1219,7 +1238,7 @@ async function uploadVideo(slot) {
     sessionStorage.setItem('firmament_force_boot', '1');
     await loadVideos();
   } catch (err) {
-    toast('Upload failed: ' + err.message, 'error');
+    if (!err.isDemo) toast('Upload failed: ' + err.message, 'error');
     if (progWrap) progWrap.style.display = 'none';
   }
 }
@@ -1232,6 +1251,7 @@ async function deleteVideo(slot) {
     sessionStorage.setItem('firmament_force_boot', '1');
     await loadVideos();
   } catch (err) {
+    if (err.isDemo) return;
     toast('Error: ' + err.message, 'error');
   }
 }
@@ -1311,7 +1331,7 @@ async function uploadFont(slot) {
     const result = await uploadFileXHR('/api/admin/upload/font', formData);
     toast(`Font uploaded: ${result.filename}`);
     await loadFonts();
-  } catch (err) { toast('Upload failed: ' + err.message, 'error'); }
+  } catch (err) { if (err.isDemo) return; toast('Upload failed: ' + err.message, 'error'); }
 }
 
 async function deleteFont(slot) {
@@ -1320,7 +1340,7 @@ async function deleteFont(slot) {
     await api('DELETE', `/api/admin/font/${slot}`);
     toast('Font removed');
     await loadFonts();
-  } catch (err) { toast('Error: ' + err.message, 'error'); }
+  } catch (err) { if (err.isDemo) return; toast('Error: ' + err.message, 'error'); }
 }
 
 // ── Favicon section (multi-slot) ──────────────────────────────────────────
@@ -1396,7 +1416,7 @@ async function loadFaviconSection() {
         toast(`Uploaded: ${result.filename}`);
         refreshFavicons();
         await loadFaviconSection();
-      } catch (err) { toast('Upload failed: ' + err.message, 'error'); }
+      } catch (err) { if (err.isDemo) return; toast('Upload failed: ' + err.message, 'error'); }
     });
 
     const delBtn = document.getElementById(`fav-delete-${slot}`);
@@ -1407,7 +1427,7 @@ async function loadFaviconSection() {
           await api('DELETE', `/api/admin/favicon/${slot}`);
           toast(`Deleted ${info.label}`);
           await loadFaviconSection();
-        } catch (err) { toast('Error: ' + err.message, 'error'); }
+        } catch (err) { if (err.isDemo) return; toast('Error: ' + err.message, 'error'); }
       });
     }
   }
@@ -1436,6 +1456,19 @@ function uploadFileXHR(url, formData, onProgress) {
     }
     xhr.onload = () => {
       if (xhr.status === 401) { reject(new Error('Unauthorised')); return; }
+      if (xhr.status === 403) {
+        let errMsg = 'HTTP 403';
+        try { const d = JSON.parse(xhr.responseText); errMsg = d.error || errMsg; } catch (_) {}
+        if (errMsg.includes('Demo mode')) {
+          toast("Demo mode — changes aren't saved, but feel free to explore!", 'info');
+          const demoErr = new Error(errMsg);
+          demoErr.isDemo = true;
+          reject(demoErr);
+          return;
+        }
+        reject(new Error(errMsg));
+        return;
+      }
       try {
         const data = JSON.parse(xhr.responseText);
         if (xhr.status >= 200 && xhr.status < 300 && data.success !== false) {
@@ -1883,7 +1916,7 @@ function initAppearanceForm() {
       await api('PUT', '/api/admin/settings', payload);
       await applyAdminTheme();
       toast('Appearance saved');
-    } catch (err) { toast('Error saving appearance', 'error'); }
+    } catch (err) { if (err.isDemo) return; toast('Error saving appearance', 'error'); }
   });
 }
 
@@ -1932,7 +1965,7 @@ function initCharacterForm() {
     try {
       await api('PUT', '/api/admin/settings', payload);
       toast('Character settings saved');
-    } catch (err) { toast('Error saving character settings', 'error'); }
+    } catch (err) { if (err.isDemo) return; toast('Error saving character settings', 'error'); }
   });
 }
 
@@ -1991,7 +2024,7 @@ function initHeroForm() {
       await api('PUT', '/api/admin/settings', payload);
       sessionStorage.removeItem('firmament_announcement_dismissed');
       toast('Hero & layout settings saved');
-    } catch (err) { toast('Error saving settings', 'error'); }
+    } catch (err) { if (err.isDemo) return; toast('Error saving settings', 'error'); }
   });
 }
 
@@ -2020,7 +2053,7 @@ function initWelcomeForm() {
       await api('PUT', '/api/admin/settings', payload);
       sessionStorage.removeItem('firmament_welcome_dismissed');
       toast('Welcome modal settings saved');
-    } catch (err) { toast('Error saving settings', 'error'); }
+    } catch (err) { if (err.isDemo) return; toast('Error saving settings', 'error'); }
   });
 }
 
@@ -2049,6 +2082,7 @@ function initExportImport() {
       toast(`Imported ${result.imported} settings (${result.skipped} skipped)`);
       await loadSettings();
     } catch (err) {
+      if (err.isDemo) return;
       toast('Import failed: ' + err.message, 'error');
     }
     this.value = '';
@@ -2118,7 +2152,7 @@ async function loadSettings() {
         await api('PUT', '/api/admin/settings', { auth_recheck_interval: value });
         sessionStorage.setItem('auth_recheck_interval', value);
         toast('Session recheck updated');
-      } catch (_) { toast('Error saving setting', 'error'); }
+      } catch (err) { if (err.isDemo) return; toast('Error saving setting', 'error'); }
     });
   }
 
@@ -2128,6 +2162,19 @@ async function loadSettings() {
 (async () => {
   try {
     await applyAdminTheme();
+
+    try {
+      const demoRes  = await fetch('/api/demo-mode');
+      const demoData = await demoRes.json();
+      if (demoData.demo) {
+        document.body.classList.add('demo-mode');
+        const banner = document.createElement('div');
+        banner.id = 'demo-banner';
+        banner.innerHTML = '<span class="demo-tag">Demo Mode</span> Changes are not saved — feel free to explore!';
+        document.getElementById('admin-main').prepend(banner);
+      }
+    } catch (_) {}
+
     await loadCategories();
     await loadServices();
     await loadSettings();
@@ -2143,7 +2190,7 @@ async function loadSettings() {
       try {
         await api('PUT', '/api/admin/settings', { show_no_videos_message: this.checked ? 'true' : 'false' });
         toast(this.checked ? '"No videos" message enabled' : '"No videos" message disabled');
-      } catch (_) { toast('Error saving setting', 'error'); }
+      } catch (err) { if (err.isDemo) return; toast('Error saving setting', 'error'); }
     });
 
     // Load media sections
