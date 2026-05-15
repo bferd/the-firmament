@@ -2170,7 +2170,7 @@ async function loadSettings() {
         document.body.classList.add('demo-mode');
         const banner = document.createElement('div');
         banner.id = 'demo-banner';
-        banner.innerHTML = '<span class="demo-tag">Demo Mode</span> Changes are not saved — feel free to explore!';
+        banner.innerHTML = '<span class="demo-tag">Demo Mode</span> Theme settings and right panel display can be changed and will apply for your session. All other changes are disabled in demo mode.';
         document.getElementById('admin-main').prepend(banner);
       }
     } catch (_) {}

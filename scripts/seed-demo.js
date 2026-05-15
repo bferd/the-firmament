@@ -71,6 +71,8 @@ for (const s of svcDefs) {
 // ── Settings: node mappings ────────────────────────────────────────────────
 const upsert = db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)');
 
+upsert.run('card_width_desktop', '300');
+
 upsert.run('influxdb_node_mappings', JSON.stringify([
   { host: 'tropus',  display: 'Tropus'  },
   { host: 'stratos', display: 'Stratos' },
