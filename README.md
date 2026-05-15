@@ -104,7 +104,13 @@ session:
       authelia_url: https://auth.yourdomain.com
 ```
 
-> **Subdomain installs:** If Firmament is on a subdomain (e.g. `demo.yourdomain.com`), do not add it to the `session.cookies` block — the parent domain cookie scope covers subdomains automatically and Authelia will refuse to start if you do. Just add the access rule for your subdomain and leave cookies as-is.
+> **Using Firmament on a subdomain?**
+> 
+> - **Root domain only** (e.g. Firmament at `yourdomain.com`): Add `yourdomain.com` to both `access_control` and `session.cookies` as shown above.
+> 
+> - **Subdomain only, no existing Authelia on root** (e.g. Firmament at `demo.yourdomain.com` with no other Authelia-protected services): Add `yourdomain.com` to `session.cookies` (the parent domain covers all subdomains) and add the access rule for `demo.yourdomain.com`.
+> 
+> - **Subdomain with Authelia already on root domain** (e.g. you already have `yourdomain.com` in `session.cookies` for other services): Do **not** add `demo.yourdomain.com` to `session.cookies` — the existing parent domain entry already covers it and Authelia will refuse to start if you add a duplicate. Just add the access rule for `demo.yourdomain.com` to `access_control`.
 
 No changes to `.env` are needed for auth — Authelia config lives entirely in `configuration.yml`.
 
