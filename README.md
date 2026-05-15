@@ -135,6 +135,16 @@ No custom Advanced config or manual `auth_request` directives are needed.
 </tr>
 </table>
 
+> **Want to protect the whole dashboard with Authelia, not just `/admin`?**
+> 
+> Instead of using a Custom Location, set Auth Request to **authelia (modern)** directly on the **Details tab** of the proxy host. This requires all visitors to authenticate before seeing anything. If you do this, remove the Custom Location entry for `/admin` — it is redundant and may cause conflicts.
+> 
+> Note: you will also need a matching access rule in Authelia's `configuration.yml` for the root path:
+> ```yaml
+> - domain: yourdomain.com
+>   policy: one_factor
+> ```
+
 ### 3. Clone the repo
 
 ```bash
