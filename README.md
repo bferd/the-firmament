@@ -104,6 +104,8 @@ session:
       authelia_url: https://auth.yourdomain.com
 ```
 
+> **Subdomain installs:** If Firmament is on a subdomain (e.g. `demo.yourdomain.com`), do not add it to the `session.cookies` block — the parent domain cookie scope covers subdomains automatically and Authelia will refuse to start if you do. Just add the access rule for your subdomain and leave cookies as-is.
+
 No changes to `.env` are needed for auth — Authelia config lives entirely in `configuration.yml`.
 
 ### 2. NPMplus
@@ -180,7 +182,7 @@ the `/videos` directory:
 ### 7. Build and start
 
 ```bash
-sudo chown -R 1000:1000 data fonts videos public #the bind mounts in docker-compose.yam instructions above
+sudo chown -R 1000:1000 data fonts videos public #the bind mounts in docker-compose.ymlinstructions above
 
 docker compose up -d --build
 ```
