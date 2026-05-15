@@ -9,6 +9,7 @@ services:
       - ./data:/app/data
       - ./videos:/app/videos
       - ./fonts:/app/fonts
+      - ./public:/app/public
     environment:
       - NODE_ENV=production
       - DB_PATH=/app/data/firmament.db
