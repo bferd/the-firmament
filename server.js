@@ -371,7 +371,7 @@ app.get('/api/layout', (req, res) => {
   ).all();
   const s = Object.fromEntries(rows.map(r => [r.key, r.value]));
   res.json({
-    card_width_desktop: parseInt(s.card_width_desktop) || 200,
+    card_width_desktop: parseInt(s.card_width_desktop) || 300,
     card_width_mobile:  parseInt(s.card_width_mobile)  || 1,
   });
 });
@@ -439,11 +439,16 @@ app.get('/api/demo-mode', (req, res) => {
 app.use('/api/admin', requireAuth);
 
 if (DEMO_MODE) {
+  const DEMO_ALLOWED_KEY_PREFIXES = ['theme_', 'panel_', 'influxdb_panel_'];
   app.use('/api/admin', (req, res, next) => {
-    if (req.method !== 'GET') {
-      return res.status(403).json({ error: 'Demo mode — changes are not saved' });
+    if (req.method === 'GET') return next();
+    if (req.method === 'PUT' && req.path === '/settings' && req.body && typeof req.body === 'object') {
+      const keys = Object.keys(req.body);
+      if (keys.length > 0 && keys.every(k => DEMO_ALLOWED_KEY_PREFIXES.some(p => k.startsWith(p)))) {
+        return next();
+      }
     }
-    next();
+    return res.status(403).json({ error: 'Demo mode — changes are not saved' });
   });
 }
 
