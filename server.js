@@ -261,7 +261,8 @@ async function verifyAuthelia(req) {
       },
     });
     if (response.ok) {
-      return { authenticated: true, username: response.headers.get('Remote-User') || 'authenticated' };
+      const user = response.headers.get('Remote-User');
+      if (user) return { authenticated: true, username: user };
     }
     return { authenticated: false, username: null };
   } catch (_) {

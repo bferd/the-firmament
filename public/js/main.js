@@ -1245,6 +1245,12 @@ async function applyTheme() {
       if (theme.footer_link_label) footerLink.textContent = theme.footer_link_label;
     }
 
+    // Logout redirect — use current origin so it works on any domain
+    const logoutLink = document.getElementById('logout-link');
+    if (logoutLink) {
+      logoutLink.href = `https://auth.schroth.ca/logout?rd=${window.location.origin}`;
+    }
+
     // Fonts
     loadGoogleFont(theme.theme_font_heading);
     loadGoogleFont(theme.theme_font_body);

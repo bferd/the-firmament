@@ -55,7 +55,7 @@ sidebarOverlay.addEventListener('click', closeSidebar);
 // ── Admin logout ──────────────────────────────────────────────────────────
 document.getElementById('admin-logout-link').addEventListener('click', (e) => {
   e.preventDefault();
-  window.location.href = 'https://auth.schroth.ca/logout?rd=https://schroth.ca';
+  window.location.href = `https://auth.schroth.ca/logout?rd=${window.location.origin}`;
 });
 
 // ── Navigation ────────────────────────────────────────────────────────────
