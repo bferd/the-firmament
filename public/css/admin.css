@@ -1250,6 +1250,7 @@ a.btn {
 /* ── Demo mode — disable destructive UI elements ─────────────────────────── */
 body.demo-mode .btn-danger,
 body.demo-mode #btn-import-settings,
+body.demo-mode #btn-export-settings,
 body.demo-mode input[type="file"] {
   opacity: 0.3;
   pointer-events: none;

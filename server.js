@@ -440,7 +440,7 @@ app.get('/api/demo-mode', (req, res) => {
 app.use('/api/admin', requireAuth);
 
 if (DEMO_MODE) {
-  const DEMO_ALLOWED_KEY_PREFIXES = ['theme_', 'panel_', 'influxdb_panel_', 'character_'];
+  const DEMO_ALLOWED_KEY_PREFIXES = ['theme_', 'panel_', 'influxdb_panel_'];
   app.use('/api/admin', (req, res, next) => {
     if (req.method === 'GET') return next();
     if (req.method === 'PUT' && req.path === '/settings' && req.body && typeof req.body === 'object') {
