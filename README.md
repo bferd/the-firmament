@@ -8,6 +8,15 @@ fully configurable admin panel.
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support%20this%20project-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/schrothdotca)
 
+## Live Demo
+
+A live demo is available at [demo.schroth.ca](https://demo.schroth.ca).
+
+- Browse the dashboard and explore all features
+- Log in to the admin panel with username: `guest` / password: `guest`
+- Theme settings and right panel display can be changed and will apply for your session
+- All other changes are disabled in demo mode
+
 ## Features
 
 - AI guardian character with scroll-driven video animations

@@ -35,3 +35,4 @@ CLAUDE.md
 .claudeignore
 docker-compose.yml
 docker-compose.yml
+scripts/seed-demo.js

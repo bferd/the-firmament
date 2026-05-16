@@ -15,7 +15,7 @@ services:
       - DB_PATH=/app/data/firmament.db
       - AUTHELIA_URL=http://192.168.x.xxx:9091
       - NPMPLUS_IP=192.168.x.xxx
-      - PROXY_SECRET=your-random-secret-here
+#      - PROXY_SECRET=your-random-secret-here
     user: "1000:1000"
     deploy:
       resources:
