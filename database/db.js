@@ -81,11 +81,11 @@ if (settingsCount === 0) {
 // InfluxDB / metrics defaults (INSERT OR IGNORE — never overwrite existing values)
 const _ig = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
 const _defaultNodeMappings = JSON.stringify([
-  { host: 'proxmox',                display: 'Tropus'  },
-  { host: 'proxmox2',               display: 'Stratos' },
-  { host: 'proxmox3',               display: 'Mesos'   },
-  { host: 'proxmox4',               display: 'Therm'   },
-  { host: 'proxmox-backup-server',  display: 'Exos'    },
+  { host: 'proxmox',                display: 'Node 1' },
+  { host: 'proxmox2',               display: 'Node 2' },
+  { host: 'proxmox3',               display: 'Node 3' },
+  { host: 'proxmox4',               display: 'Node 4' },
+  { host: 'proxmox-backup-server',  display: 'Node 5' },
 ]);
 const _defaultThresholds = JSON.stringify({
   proxmox:               { cpu: 85, ram: 90, disk: 90 },
@@ -141,7 +141,7 @@ for (const [k, v] of [
 
   // Character
   ['character_enabled',       'true'],
-  ['character_name',          'ENGEL'],
+  ['character_name',          'GUARDIAN'],
   ['character_tagline',       'GUARDIAN OF THE FIRMAMENT'],
   ['character_panel_width',   '300'],
   ['character_blend_mode',    'screen'],
@@ -152,18 +152,21 @@ for (const [k, v] of [
 
   // Hero & Layout
   ['hero_title',                 'THE FIRMAMENT'],
-  ['hero_subtitle',              'SCHROTH.CA HOMELAB'],
+  ['hero_subtitle',              'YOUR HOMELAB'],
   ['hero_show_scroll_indicator', 'true'],
   ['layout_card_style',          'glass'],
   ['layout_show_descriptions',   'true'],
   ['layout_show_urls',           'true'],
   ['layout_desktop_columns',     'auto'],
+  ['layout_show_site_title',     'true'],
+  ['layout_show_hero_title',     'true'],
+  ['layout_show_hero_subtitle',  'true'],
 
   // Footer
   ['footer_text',       'PERSONAL NON-COMMERCIAL USE ONLY'],
   ['footer_show_link',  'true'],
-  ['footer_link_url',   'https://linkstack.schroth.ca/@brad'],
-  ['footer_link_label', 'Brad Schroth'],
+  ['footer_link_url',   'https://example.com'],
+  ['footer_link_label', 'Your Name'],
 
   // Announcement
   ['announcement_enabled',     'false'],

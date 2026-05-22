@@ -15,9 +15,10 @@ if (catCount === 0) {
   require('./database/seed');
 }
 
-const DEMO_MODE    = process.env.DEMO_MODE === 'true';
-const AUTHELIA_URL = process.env.AUTHELIA_URL || 'http://192.168.1.156:9091';
-const PROXY_IP     = process.env.NPMPLUS_IP   || '192.168.1.164';
+const DEMO_MODE      = process.env.DEMO_MODE    === 'true';
+const AUTHELIA_URL   = process.env.AUTHELIA_URL  || 'http://localhost:9091';
+const AUTHELIA_HOST  = process.env.AUTHELIA_HOST || '';
+const PROXY_IP       = process.env.NPMPLUS_IP    || '127.0.0.1';
 
 // ── Auth session cache ─────────────────────────────────────────────────────
 const authCache     = new Map();
@@ -349,14 +350,17 @@ app.get('/api/auth-status', async (req, res) => {
 
 app.post('/api/logout', async (req, res) => {
   try {
+    const host       = req.headers.host || 'localhost';
+    const targetURL  = `https://${host}/`;
+    const fwdHost    = AUTHELIA_HOST || `auth.${host.split(':')[0]}`;
     const response = await fetch(`${AUTHELIA_URL}/api/sign-out`, {
       method: 'POST', redirect: 'manual',
       headers: {
         'Cookie':           req.headers.cookie || '',
         'Content-Type':     'application/json',
-        'X-Forwarded-Host': 'auth.schroth.ca',
+        'X-Forwarded-Host': fwdHost,
       },
-      body: JSON.stringify({ targetURL: 'https://schroth.ca/' }),
+      body: JSON.stringify({ targetURL }),
     });
     const setCookie = response.headers.get('set-cookie');
     if (setCookie) res.setHeader('Set-Cookie', setCookie);
@@ -364,6 +368,11 @@ app.post('/api/logout', async (req, res) => {
   } catch (_) {
     res.json({ ok: true });
   }
+});
+
+app.get('/api/logout-url', (req, res) => {
+  if (!AUTHELIA_HOST) return res.json({ url: null });
+  res.json({ url: `https://${AUTHELIA_HOST}/logout` });
 });
 
 app.get('/api/layout', (req, res) => {
@@ -392,6 +401,7 @@ const THEME_KEYS = [
   'hero_title', 'hero_subtitle', 'hero_show_scroll_indicator',
   'layout_card_style', 'layout_show_descriptions', 'layout_show_urls',
   'layout_desktop_columns',
+  'layout_show_site_title', 'layout_show_hero_title', 'layout_show_hero_subtitle',
   'footer_text', 'footer_show_link', 'footer_link_url', 'footer_link_label',
   'announcement_enabled', 'announcement_text', 'announcement_dismissible',
   'announcement_colour',

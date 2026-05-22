@@ -874,6 +874,8 @@ function updatePanelMetrics(data) {
       stats.push(`<span class="panel-stat">LA  <b>${node.loadavg.toFixed(2)}</b></span>`);
     }
 
+    if (stats.length === 0) continue;
+
     entry.innerHTML = `
       <div class="panel-node-name"${node.host && node.host !== node.display_name ? ` data-tooltip="${escHtml(node.host)}"` : ''}>${escHtml(node.display_name)}</div>
       <div class="panel-node-stats">${stats.join('')}</div>
@@ -1209,9 +1211,12 @@ async function applyTheme() {
     }
 
     // Layout helpers
-    document.body.classList.toggle('hide-descriptions', theme.layout_show_descriptions === 'false');
-    document.body.classList.toggle('hide-urls',         theme.layout_show_urls         === 'false');
-    document.body.classList.toggle('hide-scroll-hint',  theme.hero_show_scroll_indicator === 'false');
+    document.body.classList.toggle('hide-descriptions',   theme.layout_show_descriptions  === 'false');
+    document.body.classList.toggle('hide-urls',            theme.layout_show_urls          === 'false');
+    document.body.classList.toggle('hide-scroll-hint',     theme.hero_show_scroll_indicator === 'false');
+    document.body.classList.toggle('hide-site-title',      theme.layout_show_site_title    === 'false');
+    document.body.classList.toggle('hide-hero-title',      theme.layout_show_hero_title    === 'false');
+    document.body.classList.toggle('hide-hero-subtitle',   theme.layout_show_hero_subtitle === 'false');
 
     // Card style
     const cardStyle = theme.layout_card_style || 'glass';
@@ -1245,11 +1250,13 @@ async function applyTheme() {
       if (theme.footer_link_label) footerLink.textContent = theme.footer_link_label;
     }
 
-    // Logout redirect — use current origin so it works on any domain
-    const logoutLink = document.getElementById('logout-link');
-    if (logoutLink) {
-      logoutLink.href = `https://auth.schroth.ca/logout?rd=${window.location.origin}`;
-    }
+    // Logout redirect — fetch configured Authelia host from server
+    fetch('/api/logout-url').then(r => r.json()).then(data => {
+      const logoutLink = document.getElementById('logout-link');
+      if (logoutLink && data.url) {
+        logoutLink.href = `${data.url}?rd=${encodeURIComponent(window.location.origin + '/')}`;
+      }
+    }).catch(() => {});
 
     // Fonts
     loadGoogleFont(theme.theme_font_heading);

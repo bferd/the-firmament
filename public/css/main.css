@@ -1185,9 +1185,12 @@ body.card-style-bordered .service-card:hover {
 }
 
 /* ── Layout helpers ──────────────────────────────────────────────────────── */
-body.hide-descriptions .service-description { display: none !important; }
-body.hide-urls         .service-url         { display: none !important; }
-body.hide-scroll-hint  .scroll-hint         { display: none !important; }
+body.hide-descriptions   .service-description { display: none !important; }
+body.hide-urls           .service-url         { display: none !important; }
+body.hide-scroll-hint    .scroll-hint         { display: none !important; }
+body.hide-site-title     .site-logo           { display: none !important; }
+body.hide-hero-title     .hero-title          { display: none !important; }
+body.hide-hero-subtitle  .hero-subtitle       { display: none !important; }
 
 /* ── Character disabled ──────────────────────────────────────────────────── */
 body.character-disabled #engel-panel { display: none !important; }

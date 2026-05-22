@@ -1,7 +1,7 @@
 {
   "name": "firmament",
   "version": "1.0.0",
-  "description": "The Firmament — homelab portal for schroth.ca",
+  "description": "The Firmament — self-hosted homelab portal",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

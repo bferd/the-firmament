@@ -53,9 +53,19 @@ document.getElementById('sidebar-close').addEventListener('click', closeSidebar)
 sidebarOverlay.addEventListener('click', closeSidebar);
 
 // ── Admin logout ──────────────────────────────────────────────────────────
+fetch('/api/logout-url').then(r => r.json()).then(data => {
+  if (data.url) {
+    const link = document.getElementById('admin-logout-link');
+    if (link) {
+      link.href = `${data.url}?rd=${encodeURIComponent(window.location.origin + '/')}`;
+      link.dataset.logoutReady = '1';
+    }
+  }
+}).catch(() => {});
+
 document.getElementById('admin-logout-link').addEventListener('click', (e) => {
-  e.preventDefault();
-  window.location.href = `https://auth.schroth.ca/logout?rd=${window.location.origin}`;
+  const link = e.currentTarget;
+  if (!link.dataset.logoutReady) e.preventDefault();
 });
 
 // ── Navigation ────────────────────────────────────────────────────────────
@@ -336,6 +346,30 @@ document.getElementById('edit-svc-form').addEventListener('submit', async (e) =>
 
 document.getElementById('cancel-edit-svc').addEventListener('click', () => {
   document.getElementById('edit-svc-form').style.display = 'none';
+});
+
+// Category change → sync accent colour picker
+document.getElementById('new-svc-cat')?.addEventListener('change', function () {
+  if (!this.value) return;
+  const cat = categories.find(c => String(c.id) === this.value);
+  if (cat) document.getElementById('new-svc-accent').value = cat.colour;
+});
+
+document.getElementById('edit-svc-cat')?.addEventListener('change', function () {
+  if (!this.value) return;
+  const cat = categories.find(c => String(c.id) === this.value);
+  if (cat) document.getElementById('edit-svc-accent').value = cat.colour;
+});
+
+// Host dropdown → auto-check disable-offline
+document.getElementById('new-svc-host-name')?.addEventListener('change', function () {
+  const cb = document.getElementById('new-svc-disable-offline');
+  if (cb) cb.checked = !!this.value;
+});
+
+document.getElementById('edit-svc-host-name')?.addEventListener('change', function () {
+  const cb = document.getElementById('edit-svc-disable-offline');
+  if (cb) cb.checked = !!this.value;
 });
 
 // ── Settings Panel ────────────────────────────────────────────────────────
@@ -1882,6 +1916,8 @@ function initAppearanceForm() {
         const scanlineValEl = document.getElementById('scanline-intensity-val');
         if (scanlineValEl) scanlineValEl.textContent = parseFloat(scanlineIntEl.value).toFixed(3);
       }
+      const announceEl = document.getElementById('announce-colour');
+      if (announceEl) announceEl.value = data.theme_accent_primary || '#fbbf24';
     }
     setColourControlsDisabled(this.value !== 'custom');
     updateThemePreview();
@@ -1943,7 +1979,7 @@ function sanitiseCSS(css) {
 function loadCharacterSettings(settings) {
   const el = (id) => document.getElementById(id);
   if (el('char-enabled'))      el('char-enabled').checked      = settings.character_enabled !== 'false';
-  if (el('char-name'))         el('char-name').value           = settings.character_name    || 'ENGEL';
+  if (el('char-name'))         el('char-name').value           = settings.character_name    || 'GUARDIAN';
   if (el('char-tagline'))      el('char-tagline').value        = settings.character_tagline || 'GUARDIAN OF THE FIRMAMENT';
   if (el('char-panel-width'))  el('char-panel-width').value    = settings.character_panel_width  || '300';
   if (el('char-blend-mode'))   el('char-blend-mode').value     = settings.character_blend_mode   || 'screen';
@@ -1964,7 +2000,7 @@ function initCharacterForm() {
     const side = document.querySelector('input[name="char-side"]:checked')?.value || 'right';
     const payload = {
       character_enabled:       document.getElementById('char-enabled')?.checked      ? 'true' : 'false',
-      character_name:          document.getElementById('char-name')?.value.trim()     || 'ENGEL',
+      character_name:          document.getElementById('char-name')?.value.trim()     || 'GUARDIAN',
       character_tagline:       document.getElementById('char-tagline')?.value.trim()  || '',
       character_panel_width:   document.getElementById('char-panel-width')?.value      || '300',
       character_blend_mode:    document.getElementById('char-blend-mode')?.value       || 'screen',
@@ -1989,12 +2025,15 @@ function loadHeroSettings(settings) {
   if (el('set-card-width-desktop')) el('set-card-width-desktop').value = settings.card_width_desktop || '200';
   if (el('set-card-width-mobile'))  el('set-card-width-mobile').value  = settings.card_width_mobile  || '1';
   if (el('hero-title'))               el('hero-title').value                = settings.hero_title            || 'THE FIRMAMENT';
-  if (el('hero-subtitle'))            el('hero-subtitle').value             = settings.hero_subtitle         || 'SCHROTH.CA HOMELAB';
+  if (el('hero-subtitle'))            el('hero-subtitle').value             = settings.hero_subtitle         || 'YOUR HOMELAB';
   if (el('hero-scroll-indicator'))    el('hero-scroll-indicator').checked   = settings.hero_show_scroll_indicator !== 'false';
   if (el('layout-card-style'))        el('layout-card-style').value         = settings.layout_card_style       || 'glass';
   if (el('layout-desktop-columns'))   el('layout-desktop-columns').value    = settings.layout_desktop_columns  || 'auto';
-  if (el('layout-show-descriptions')) el('layout-show-descriptions').checked = settings.layout_show_descriptions !== 'false';
-  if (el('layout-show-urls'))         el('layout-show-urls').checked        = settings.layout_show_urls         !== 'false';
+  if (el('layout-show-descriptions'))  el('layout-show-descriptions').checked  = settings.layout_show_descriptions  !== 'false';
+  if (el('layout-show-urls'))          el('layout-show-urls').checked           = settings.layout_show_urls          !== 'false';
+  if (el('layout-show-site-title'))    el('layout-show-site-title').checked     = settings.layout_show_site_title    !== 'false';
+  if (el('layout-show-hero-title'))    el('layout-show-hero-title').checked     = settings.layout_show_hero_title    !== 'false';
+  if (el('layout-show-hero-subtitle')) el('layout-show-hero-subtitle').checked  = settings.layout_show_hero_subtitle !== 'false';
   if (el('footer-text-input'))        el('footer-text-input').value         = settings.footer_text              || '';
   if (el('footer-show-link'))         el('footer-show-link').checked        = settings.footer_show_link         !== 'false';
   if (el('footer-link-url'))          el('footer-link-url').value           = settings.footer_link_url          || '';
@@ -2020,8 +2059,11 @@ function initHeroForm() {
       hero_show_scroll_indicator:  el('hero-scroll-indicator')?.checked     ? 'true' : 'false',
       layout_card_style:           el('layout-card-style')?.value            || 'glass',
       layout_desktop_columns:      el('layout-desktop-columns')?.value       || 'auto',
-      layout_show_descriptions:    el('layout-show-descriptions')?.checked  ? 'true' : 'false',
-      layout_show_urls:            el('layout-show-urls')?.checked           ? 'true' : 'false',
+      layout_show_descriptions:    el('layout-show-descriptions')?.checked   ? 'true' : 'false',
+      layout_show_urls:            el('layout-show-urls')?.checked            ? 'true' : 'false',
+      layout_show_site_title:      el('layout-show-site-title')?.checked      ? 'true' : 'false',
+      layout_show_hero_title:      el('layout-show-hero-title')?.checked      ? 'true' : 'false',
+      layout_show_hero_subtitle:   el('layout-show-hero-subtitle')?.checked   ? 'true' : 'false',
       footer_text:                 el('footer-text-input')?.value.trim()     || '',
       footer_show_link:            el('footer-show-link')?.checked           ? 'true' : 'false',
       footer_link_url:             el('footer-link-url')?.value.trim()       || '',

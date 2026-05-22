@@ -74,20 +74,20 @@ const upsert = db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (
 upsert.run('card_width_desktop', '300');
 
 upsert.run('influxdb_node_mappings', JSON.stringify([
-  { host: 'tropus',  display: 'Tropus'  },
-  { host: 'stratos', display: 'Stratos' },
-  { host: 'mesos',   display: 'Mesos'   },
-  { host: 'therm',   display: 'Therm'   },
+  { host: 'node-1', display: 'Node 1' },
+  { host: 'node-2', display: 'Node 2' },
+  { host: 'node-3', display: 'Node 3' },
+  { host: 'node-4', display: 'Node 4' },
 ]));
 
 // ── Settings: demo metrics data ────────────────────────────────────────────
 upsert.run('demo_metrics_data', JSON.stringify({
   status: 'nominal',
   nodes: [
-    { host: 'tropus',  display_name: 'Tropus',  object: 'node', cpu: 23.4, ram: 61.2, disk: 34.8, uptime: '12d 4h',  loadavg: 0.87, offline: false },
-    { host: 'stratos', display_name: 'Stratos', object: 'node', cpu:  8.1, ram: 44.7, disk: 52.1, uptime: '28d 7h',  loadavg: 0.31, offline: false },
-    { host: 'mesos',   display_name: 'Mesos',   object: 'node', cpu: 41.6, ram: 78.3, disk: 67.4, uptime: '5d 11h',  loadavg: 2.14, offline: false },
-    { host: 'therm',   display_name: 'Therm',   object: 'node', cpu: 15.9, ram: 55.8, disk: 45.2, uptime: '19d 2h',  loadavg: 0.62, offline: false },
+    { host: 'node-1', display_name: 'Node 1', object: 'node', cpu: 23.4, ram: 61.2, disk: 34.8, uptime: '12d 4h',  loadavg: 0.87, offline: false },
+    { host: 'node-2', display_name: 'Node 2', object: 'node', cpu:  8.1, ram: 44.7, disk: 52.1, uptime: '28d 7h',  loadavg: 0.31, offline: false },
+    { host: 'node-3', display_name: 'Node 3', object: 'node', cpu: 41.6, ram: 78.3, disk: 67.4, uptime: '5d 11h',  loadavg: 2.14, offline: false },
+    { host: 'node-4', display_name: 'Node 4', object: 'node', cpu: 15.9, ram: 55.8, disk: 45.2, uptime: '19d 2h',  loadavg: 0.62, offline: false },
   ],
   containers: [
     { host: 'jellyfin',      display_name: 'JELLYFIN',      object: 'lxc',  cpu:  4.2, ram: 38.1, disk: 22.4, uptime: '12d 4h', loadavg: null, offline: false },
@@ -100,9 +100,9 @@ upsert.run('demo_metrics_data', JSON.stringify({
     { host: 'grafana',       display_name: 'GRAFANA',       object: 'lxc',  cpu:  0.6, ram: 19.8, disk: 11.2, uptime: '12d 4h', loadavg: null, offline: false },
   ],
   storages: [
-    { name: 'local-lvm',      node: 'tropus',  used_bytes: 214748364800,  total_bytes: 499122659328,  disk: 43.0, shared: false },
-    { name: 'local-lvm',      node: 'stratos', used_bytes: 107374182400,  total_bytes: 499122659328,  disk: 21.5, shared: false },
-    { name: 'local-lvm',      node: 'mesos',   used_bytes: 322122547200,  total_bytes: 499122659328,  disk: 64.5, shared: false },
+    { name: 'local-lvm',      node: 'node-1',  used_bytes: 214748364800,  total_bytes: 499122659328,  disk: 43.0, shared: false },
+    { name: 'local-lvm',      node: 'node-2',  used_bytes: 107374182400,  total_bytes: 499122659328,  disk: 21.5, shared: false },
+    { name: 'local-lvm',      node: 'node-3',  used_bytes: 322122547200,  total_bytes: 499122659328,  disk: 64.5, shared: false },
     { name: 'hdd-1tb',        node: null,      used_bytes: 687194767360,  total_bytes: 1099511627776, disk: 62.5, shared: true  },
     { name: 'proxmox-backup', node: null,      used_bytes: 858993459200,  total_bytes: 2199023255552, disk: 39.1, shared: true  },
   ],
@@ -191,7 +191,7 @@ upsert.run('welcome_modal_once_per_session', 'true');
 console.log('Done.');
 console.log(`  ${catDefs.length} categories: ${catDefs.map(c => c.name).join(', ')}`);
 console.log(`  ${svcDefs.length} services across all categories`);
-console.log('  4 node mappings: Tropus, Stratos, Mesos, Therm');
+console.log('  4 node mappings: Node 1, Node 2, Node 3, Node 4');
 console.log('  demo_metrics_data: 4 nodes, 8 containers, 5 storages');
 console.log('  demo_borg_data: 2 repos (main + offsite), both healthy');
 console.log('  footer_show_link: false');

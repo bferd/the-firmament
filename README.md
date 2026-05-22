@@ -167,6 +167,7 @@ cp docker-compose.example.yml docker-compose.yml
 
 Edit `.env` and fill in your values:
 - `AUTHELIA_URL` — your Authelia instance IP and port
+- `AUTHELIA_HOST` — your Authelia hostname used for the logout redirect URL (e.g. `auth.your-domain.com`)
 - `NPMPLUS_IP` — your NPMplus reverse proxy IP
 - `BIND_IP` — your server IP
 
@@ -179,8 +180,9 @@ ports:
   - "YOUR_SERVER_IP:3000:3000"  # Change to your server IP
 
 environment:
-  - AUTHELIA_URL=http://YOUR_AUTHELIA_IP:9091  # Your Authelia instance
-  - NPMPLUS_IP=YOUR_NPMPLUS_IP                 # Your reverse proxy IP
+  - AUTHELIA_URL=http://YOUR_AUTHELIA_IP:9091   # Your Authelia instance
+  - AUTHELIA_HOST=auth.your-domain.com          # Authelia hostname for logout redirect
+  - NPMPLUS_IP=YOUR_NPMPLUS_IP                  # Your reverse proxy IP
 ```
 
 The compose file expects these directories (bind mounts) without these uploads will be overwritten on restart:
