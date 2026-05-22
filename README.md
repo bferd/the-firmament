@@ -259,4 +259,4 @@ MIT — see LICENSE file.
 
 ## Credits
 
-Created by [Brad Schroth](https://linkstack.schroth.ca/@brad) — [schroth.ca](https://schroth.ca)
+Created by [Brad Schroth](https://linkstack.schroth.ca/@brad) — [Buy Me A Coffee](https://buymeacoffee.com/schrothdotca)
