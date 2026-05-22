@@ -1247,6 +1247,21 @@ a.btn {
   text-transform: uppercase;
 }
 
+/* ── Emoji helper hint ───────────────────────────────────────────────────── */
+.emoji-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 0.3rem;
+  line-height: 1.4;
+}
+.emoji-hint a {
+  color: var(--text-dim);
+  text-decoration: none;
+}
+.emoji-hint a:hover {
+  text-decoration: underline;
+}
+
 /* ── Demo mode — disable destructive UI elements ─────────────────────────── */
 body.demo-mode .btn-danger,
 body.demo-mode #btn-import-settings,

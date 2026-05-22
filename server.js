@@ -352,7 +352,7 @@ app.post('/api/logout', async (req, res) => {
   try {
     const host       = req.headers.host || 'localhost';
     const targetURL  = `https://${host}/`;
-    const fwdHost    = AUTHELIA_HOST || `auth.${host.split(':')[0]}`;
+    const fwdHost    = AUTHELIA_HOST || host.split(':')[0];
     const response = await fetch(`${AUTHELIA_URL}/api/sign-out`, {
       method: 'POST', redirect: 'manual',
       headers: {

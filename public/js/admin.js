@@ -433,7 +433,7 @@ function buildNodeBlock(host, display, diskStorage, availableHosts, availableSto
       </div>
       <div class="form-group">
         <label>Display Name</label>
-        <input type="text" class="node-display" value="${escHtml(display)}" placeholder="TROPUS">
+        <input type="text" class="node-display" value="${escHtml(display)}" placeholder="Node Display Name">
       </div>
       <div class="form-group" style="justify-content:flex-end;padding-bottom:0">
         <label>&nbsp;</label>

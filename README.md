@@ -133,6 +133,10 @@ Authelia is applied only to `/admin` via a **Custom Location**, not to the whole
 
 No custom Advanced config or manual `auth_request` directives are needed.
 
+> **Login redirect goes to the wrong URL?**
+>
+> When an unauthenticated user visits `/admin`, Authelia intercepts the request at the proxy layer and redirects them to its own login page. The URL of that login page (e.g. `https://auth.yourdomain.com/`) is determined entirely by the `authelia_url` value in the `session.cookies` block of your Authelia `configuration.yml` — Firmament has no control over it. If the login redirect goes somewhere unexpected, check your Authelia configuration, not the app.
+
 <table>
 <tr>
 <td><strong>Details tab</strong> — Auth Request: none on the main proxy host</td>
@@ -167,7 +171,7 @@ cp docker-compose.example.yml docker-compose.yml
 
 Edit `.env` and fill in your values:
 - `AUTHELIA_URL` — your Authelia instance IP and port
-- `AUTHELIA_HOST` — your Authelia hostname used for the logout redirect URL (e.g. `auth.your-domain.com`)
+- `AUTHELIA_HOST` — your Authelia public hostname, used for the post-logout redirect (e.g. `auth.your-domain.com`). Must match the `authelia_url` domain in your Authelia `configuration.yml`, without `https://` and without a trailing `/`. If not set, logout redirects to the portal domain instead of Authelia.
 - `NPMPLUS_IP` — your NPMplus reverse proxy IP
 - `BIND_IP` — your server IP
 
@@ -181,9 +185,11 @@ ports:
 
 environment:
   - AUTHELIA_URL=http://YOUR_AUTHELIA_IP:9091   # Your Authelia instance
-  - AUTHELIA_HOST=auth.your-domain.com          # Authelia hostname for logout redirect
+  - AUTHELIA_HOST=auth.your-domain.com          # Your Authelia public hostname — used for the post-logout redirect
   - NPMPLUS_IP=YOUR_NPMPLUS_IP                  # Your reverse proxy IP
 ```
+
+`AUTHELIA_HOST` must match the `authelia_url` domain in your Authelia `configuration.yml` (without `https://` and without a trailing `/`). If not set, logout will redirect to the portal domain instead of Authelia.
 
 The compose file expects these directories (bind mounts) without these uploads will be overwritten on restart:
 - `./data/` — SQLite database (created automatically)
