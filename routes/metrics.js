@@ -146,6 +146,7 @@ function processRows(rows, settings) {
 
   const nodeHostSet    = new Set(nodeMappings.map(n => n.host));
   const nodeDisplayMap = Object.fromEntries(nodeMappings.map(n => [n.host, n.display || n.host.toUpperCase()]));
+  const nodeTypeMap    = Object.fromEntries(nodeMappings.map(n => [n.host, n.node_type || 'pve']));
 
   const defaultWatchNodes = nodeMappings.map(n => n.host);
   const watchNodes    = new Set(statusConfig.watch_nodes   || defaultWatchNodes);
@@ -165,6 +166,12 @@ function processRows(rows, settings) {
     // Storage volumes (object=storages) share the node hostname but carry no CPU/RAM.
     // They clutter the panel as phantom node entries — skip them entirely.
     if (entry.object === 'storages') continue;
+
+    // PBS nodes report mem as a float percentage (0–100), not bytes.
+    if (nodeTypeMap[entry.host] === 'pbs') {
+      const rawRam = csvNum(row.mem);
+      entry.ram = rawRam !== undefined ? capPercent(rawRam, entry.host, 'ram') : null;
+    }
 
     entry = applyOverrides(entry, overrides);
     seenHosts.add(entry.host);

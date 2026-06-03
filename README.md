@@ -241,15 +241,11 @@ These are set at runtime by `applyTheme()` in `main.js`. Use them in custom CSS 
 
 ### Proxmox Backup Server (PBS) node metrics
 
-PBS nodes expose memory differently from standard PVE nodes. A PBS node reports memory as a **float percentage (0–100)** rather than used/total bytes. Similarly, disk usage for PBS represents **datastore usage in GB**, not raw bytes like LXC/QEMU containers.
+PBS nodes expose memory differently from standard PVE nodes. A PBS node reports memory as a **float percentage (0–100)** rather than used/total bytes.
 
-To handle this correctly, add `"node_type": "pbs"` to the node mapping for any PBS node in the admin panel (Settings → InfluxDB → Node Mappings). PVE nodes do not need this field (it defaults to `"pve"`).
+To handle this correctly, open the node mapping card for your PBS node in the admin panel (Settings → InfluxDB → Node Mappings), expand **Thresholds & Config**, and check the **PBS Node** checkbox. PVE nodes do not need this — leave it unchecked.
 
-```json
-{ "host": "proxmox-backup-server", "display": "PBS", "node_type": "pbs" }
-```
-
-Without this flag, PBS memory and disk values will be misread — memory will appear as a near-zero percentage and disk will be off by several orders of magnitude.
+Without this flag, PBS memory values will be misread and will appear as a near-zero percentage.
 
 ---
 

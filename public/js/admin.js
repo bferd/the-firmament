@@ -399,11 +399,11 @@ function renderNodeMappings() {
   const container = document.getElementById('node-mappings-list');
   container.innerHTML = '';
   for (const node of metricsState.nodeMappings) {
-    container.appendChild(buildNodeBlock(node.host, node.display, node.disk_storage || '', null, metricsState.availableStorages));
+    container.appendChild(buildNodeBlock(node.host, node.display, node.disk_storage || '', null, metricsState.availableStorages, node.node_type || ''));
   }
 }
 
-function buildNodeBlock(host, display, diskStorage, availableHosts, availableStorages) {
+function buildNodeBlock(host, display, diskStorage, availableHosts, availableStorages, nodeType) {
   const thr = metricsState.thresholds[host] || { cpu: 85, ram: 90, disk: 90 };
   const block = document.createElement('div');
   block.className    = 'node-mapping-block';
@@ -462,6 +462,13 @@ function buildNodeBlock(host, display, diskStorage, availableHosts, availableSto
             <label>Disk Source</label>
             <select class="node-disk-storage">${storageOpts}</select>
           </div>
+          <div class="form-group">
+            <label>Node Type</label>
+            <div class="checkbox-list">
+              <label class="checkbox-item"><input type="checkbox" class="node-pbs"${nodeType === 'pbs' ? ' checked' : ''}> PBS Node</label>
+            </div>
+            <div class="field-desc" style="font-size:11px;color:var(--text-dim);margin-top:0.2rem">Check for Proxmox Backup Server nodes (memory reported as %)</div>
+          </div>
         </div>
       </details>
     </div>
@@ -479,7 +486,7 @@ document.getElementById('btn-add-node').addEventListener('click', async () => {
     available = (data.hosts || []).filter(h => !configuredHosts.has(h));
   } catch (_) {}
   document.getElementById('node-mappings-list').appendChild(
-    buildNodeBlock('', '', '', available, metricsState.availableStorages)
+    buildNodeBlock('', '', '', available, metricsState.availableStorages, '')
   );
   syncNodeCheckboxes();
 });
@@ -488,6 +495,18 @@ function syncNodeCheckboxes() {
   const hosts = getNodeMappingsFromDOM().map(n => n.host).filter(Boolean);
   refreshCheckboxList('status-watch-nodes', hosts, metricsState.statusConfig.watch_nodes || hosts);
   refreshCheckboxList('panel-show-nodes',   hosts, metricsState.panelConfig.show_nodes   || hosts);
+  syncOverrideHostDropdowns(hosts);
+}
+
+function syncOverrideHostDropdowns(hosts) {
+  const hostList = hosts || getNodeMappingsFromDOM().map(n => n.host).filter(Boolean);
+  document.querySelectorAll('.override-block').forEach(block => {
+    const sel = block.querySelector('.ov-host');
+    if (!sel || sel.tagName !== 'SELECT') return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— select host —</option>' +
+      hostList.map(h => `<option value="${escHtml(h)}"${h === current ? ' selected' : ''}>${escHtml(h)}</option>`).join('');
+  });
 }
 
 function refreshCheckboxList(containerId, hosts, checked) {
@@ -512,6 +531,7 @@ function getNodeMappingsFromDOM() {
     };
     const disk_storage = block.querySelector('.node-disk-storage')?.value?.trim() || '';
     if (disk_storage) mapping.disk_storage = disk_storage;
+    if (block.querySelector('.node-pbs')?.checked) mapping.node_type = 'pbs';
     return mapping;
   });
 }
@@ -740,20 +760,23 @@ const OVERRIDE_FIELDS = ['cpu', 'ram', 'disk', 'uptime', 'loadavg'];
 function renderOverrides() {
   const container = document.getElementById('overrides-list');
   container.innerHTML = '';
+  const hosts = metricsState.nodeMappings.map(n => n.host).filter(Boolean);
   for (const ov of metricsState.overrides) {
-    container.appendChild(buildOverrideBlock(ov.host, ov.field, ov.overrides || {}));
+    container.appendChild(buildOverrideBlock(ov.host, ov.field, ov.overrides || {}, hosts));
   }
 }
 
-function buildOverrideBlock(host, field, props) {
+function buildOverrideBlock(host, field, props, availableHosts) {
   const block = document.createElement('div');
   block.className = 'override-block';
   const fieldOpts = OVERRIDE_FIELDS.map(f => `<option value="${f}"${f === field ? ' selected' : ''}>${f}</option>`).join('');
+  const hostOpts = '<option value="">— select host —</option>' +
+    (availableHosts || []).map(h => `<option value="${escHtml(h)}"${h === host ? ' selected' : ''}>${escHtml(h)}</option>`).join('');
   block.innerHTML = `
     <div class="override-row">
       <div class="form-group">
         <label>Host</label>
-        <input type="text" class="ov-host" value="${escHtml(host)}" placeholder="proxmox">
+        <select class="ov-host">${hostOpts}</select>
       </div>
       <div class="form-group">
         <label>Field</label>
@@ -794,7 +817,8 @@ function buildOverrideBlock(host, field, props) {
 }
 
 document.getElementById('btn-add-override').addEventListener('click', () => {
-  document.getElementById('overrides-list').appendChild(buildOverrideBlock('', 'cpu', {}));
+  const hosts = getNodeMappingsFromDOM().map(n => n.host).filter(Boolean);
+  document.getElementById('overrides-list').appendChild(buildOverrideBlock('', 'cpu', {}, hosts));
 });
 
 function getOverridesFromDOM() {
