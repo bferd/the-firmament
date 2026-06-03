@@ -613,17 +613,6 @@ tr.metrics-warn td { background: rgba(239, 68, 68, 0.04); }
   padding: 0.75rem;
 }
 
-/* ── Influx split test connection ────────────────────────────────────────── */
-#influx-test-split-container.split {
-  display: flex;
-  gap: 1rem;
-}
-
-.influx-test-half {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
 .node-thresholds {
   padding: 0.75rem;
   padding-top: 0;

@@ -510,16 +510,6 @@ function syncPbsSection() {
   if (pbsSettings)  pbsSettings.style.display  = hasPbs ? '' : 'none';
   if (pbsStatusGrp) pbsStatusGrp.style.display = hasPbs ? '' : 'none';
   if (pbsPanelGrp)  pbsPanelGrp.style.display  = hasPbs ? '' : 'none';
-
-  // Split / unsplit the Influx Test Connection block
-  const splitContainer = document.getElementById('influx-test-split-container');
-  const pbsHalf        = document.getElementById('influx-test-pbs-half');
-  const pveTitle       = document.getElementById('influx-test-pve-title');
-  const pveBtn         = document.getElementById('btn-test-influx');
-  if (splitContainer) splitContainer.classList.toggle('split', hasPbs);
-  if (pbsHalf)        pbsHalf.style.display = hasPbs ? '' : 'none';
-  if (pveTitle)       pveTitle.textContent  = hasPbs ? 'Test PVE Connection' : 'Test Connection';
-  if (pveBtn)         pveBtn.textContent    = hasPbs ? 'Test PVE Connection' : 'Test Connection';
 }
 
 function syncOverrideHostDropdowns(hosts) {
@@ -1015,17 +1005,6 @@ document.getElementById('btn-test-influx').addEventListener('click', async () =>
   resultEl.value = 'Connecting...';
   try {
     const data = await api('GET', '/api/metrics');
-    resultEl.value = JSON.stringify(data, null, 2);
-  } catch (err) {
-    resultEl.value = 'Error: ' + err.message;
-  }
-});
-
-document.getElementById('btn-test-pbs-influx').addEventListener('click', async () => {
-  const resultEl = document.getElementById('influx-pbs-test-result');
-  resultEl.value = 'Connecting...';
-  try {
-    const data = await api('GET', '/api/pbs-status');
     resultEl.value = JSON.stringify(data, null, 2);
   } catch (err) {
     resultEl.value = 'Error: ' + err.message;
