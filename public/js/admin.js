@@ -399,11 +399,11 @@ function renderNodeMappings() {
   const container = document.getElementById('node-mappings-list');
   container.innerHTML = '';
   for (const node of metricsState.nodeMappings) {
-    container.appendChild(buildNodeBlock(node.host, node.display, node.disk_storage || '', null, metricsState.availableStorages, node.node_type || ''));
+    container.appendChild(buildNodeBlock(node.host, node.display, node.disk_storage || '', null, metricsState.availableStorages));
   }
 }
 
-function buildNodeBlock(host, display, diskStorage, availableHosts, availableStorages, nodeType) {
+function buildNodeBlock(host, display, diskStorage, availableHosts, availableStorages) {
   const thr = metricsState.thresholds[host] || { cpu: 85, ram: 90, disk: 90 };
   const block = document.createElement('div');
   block.className    = 'node-mapping-block';
@@ -462,13 +462,6 @@ function buildNodeBlock(host, display, diskStorage, availableHosts, availableSto
             <label>Disk Source</label>
             <select class="node-disk-storage">${storageOpts}</select>
           </div>
-          <div class="form-group">
-            <label>Node Type</label>
-            <div class="checkbox-list">
-              <label class="checkbox-item"><input type="checkbox" class="node-pbs"${nodeType === 'pbs' ? ' checked' : ''}> PBS Node</label>
-            </div>
-            <div class="field-desc" style="font-size:11px;color:var(--text-dim);margin-top:0.2rem">Check for Proxmox Backup Server nodes (memory reported as %)</div>
-          </div>
         </div>
       </details>
     </div>
@@ -486,7 +479,7 @@ document.getElementById('btn-add-node').addEventListener('click', async () => {
     available = (data.hosts || []).filter(h => !configuredHosts.has(h));
   } catch (_) {}
   document.getElementById('node-mappings-list').appendChild(
-    buildNodeBlock('', '', '', available, metricsState.availableStorages, '')
+    buildNodeBlock('', '', '', available, metricsState.availableStorages)
   );
   syncNodeCheckboxes();
 });
@@ -531,7 +524,6 @@ function getNodeMappingsFromDOM() {
     };
     const disk_storage = block.querySelector('.node-disk-storage')?.value?.trim() || '';
     if (disk_storage) mapping.disk_storage = disk_storage;
-    if (block.querySelector('.node-pbs')?.checked) mapping.node_type = 'pbs';
     return mapping;
   });
 }

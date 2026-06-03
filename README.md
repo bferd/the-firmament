@@ -237,18 +237,6 @@ Themes are fully configured through the admin panel — no CSS edits required fo
 
 These are set at runtime by `applyTheme()` in `main.js`. Use them in custom CSS as `rgba(var(--accent-rgb), 0.4)` rather than hardcoding hex values, so your additions stay theme-aware.
 
-## Notes & Troubleshooting
-
-### Proxmox Backup Server (PBS) node metrics
-
-PBS nodes expose memory differently from standard PVE nodes. A PBS node reports memory as a **float percentage (0–100)** rather than used/total bytes.
-
-To handle this correctly, open the node mapping card for your PBS node in the admin panel (Settings → InfluxDB → Node Mappings), expand **Thresholds & Config**, and check the **PBS Node** checkbox. PVE nodes do not need this — leave it unchecked.
-
-Without this flag, PBS memory values will be misread and will appear as a near-zero percentage.
-
----
-
 ## License
 
 MIT — see LICENSE file.
