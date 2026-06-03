@@ -989,6 +989,7 @@ document.getElementById('pbs-settings-form')?.addEventListener('submit', async (
       pbs_token:            document.getElementById('set-pbs-token').value.trim(),
       pbs_refresh_interval: document.getElementById('set-pbs-interval').value.trim() || '60',
       pbs_task_limit:       document.getElementById('set-pbs-task-limit').value.trim() || '50',
+      pbs_node_name:        document.getElementById('set-pbs-node-name')?.value.trim() || 'proxmox-backup-server',
     });
     toast('PBS settings saved');
   } catch (err) {
@@ -2294,9 +2295,11 @@ async function loadSettings() {
   const pbsUrlEl = document.getElementById('set-pbs-url');
   if (pbsUrlEl) {
     pbsUrlEl.value = settings.pbs_url || '';
-    document.getElementById('set-pbs-token').value     = settings.pbs_token            || '';
-    document.getElementById('set-pbs-interval').value  = settings.pbs_refresh_interval || '60';
-    document.getElementById('set-pbs-task-limit').value = settings.pbs_task_limit      || '50';
+    document.getElementById('set-pbs-token').value      = settings.pbs_token            || '';
+    document.getElementById('set-pbs-interval').value   = settings.pbs_refresh_interval || '60';
+    document.getElementById('set-pbs-task-limit').value = settings.pbs_task_limit       || '50';
+    const pbsNodeNameEl = document.getElementById('set-pbs-node-name');
+    if (pbsNodeNameEl) pbsNodeNameEl.value = settings.pbs_node_name || 'proxmox-backup-server';
   }
 
   metricsState.pbsStatusConfig = parseJSON(settings.pbs_status_config || '{}', {});

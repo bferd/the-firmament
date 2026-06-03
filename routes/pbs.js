@@ -119,6 +119,7 @@ async function fetchPbsStatus(settings) {
   const token    = settings.pbs_token            || '';
   const interval = parseInt(settings.pbs_refresh_interval || '60', 10);
   const limit    = parseInt(settings.pbs_task_limit       || '50', 10);
+  const nodeName = settings.pbs_node_name        || 'proxmox-backup-server';
 
   if (!url || !token) {
     return { connected: false, status: 'unknown', error: 'not configured' };
@@ -135,12 +136,6 @@ async function fetchPbsStatus(settings) {
   };
 
   try {
-    // Auto-discover PBS node name
-    const nodesRes = await pbsRequest(`${url}/api2/json/nodes`, headers);
-    if (!nodesRes.ok) throw new Error(`PBS nodes endpoint returned HTTP ${nodesRes.status}`);
-    const nodeName = nodesRes.data?.data?.[0]?.node;
-    if (!nodeName) throw new Error('Could not determine PBS node name from /api2/json/nodes');
-
     // Parallel: datastore usage + task list
     const [datastoreRes, tasksRes] = await Promise.all([
       pbsRequest(`${url}/api2/json/status/datastore-usage`, headers),

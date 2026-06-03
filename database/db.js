@@ -125,6 +125,7 @@ for (const [k, v] of [
   ['pbs_token',                 ''],
   ['pbs_refresh_interval',      '60'],
   ['pbs_task_limit',            '50'],
+  ['pbs_node_name',             'proxmox-backup-server'],
   ['pbs_status_config',         JSON.stringify({
     backup_failed:              true,
     backup_warning:             false,
