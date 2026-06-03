@@ -4,6 +4,7 @@ const express            = require('express');
 const router             = express.Router();
 const db                 = require('../database/db');
 const { fetchBorgStatus } = require('./borg');
+const { fetchPbsStatus  } = require('./pbs');
 
 const DEMO_MODE = process.env.DEMO_MODE === 'true';
 
@@ -11,6 +12,13 @@ let cache = { data: null, ts: 0 };
 
 function parseJSON(str, fallback) {
   try { return JSON.parse(str); } catch (_) { return fallback; }
+}
+
+function buildPanelConfig(settings) {
+  const cfg      = parseJSON(settings.influxdb_panel_config  || '{}', {});
+  const nodeMaps = parseJSON(settings.influxdb_node_mappings || '[]', []);
+  cfg.has_pbs_nodes = nodeMaps.some(n => n.node_type === 'pbs');
+  return cfg;
 }
 
 function formatUptime(seconds) {
@@ -292,8 +300,8 @@ router.get('/api/metrics', async (req, res) => {
     if (demo) return res.json({
       ...demo,
       last_updated: new Date().toISOString(),
-      panel_config: parseJSON(settings.influxdb_panel_config || '{}', {}),
-      thresholds:   parseJSON(settings.influxdb_thresholds   || '{}', {}),
+      panel_config: buildPanelConfig(settings),
+      thresholds:   parseJSON(settings.influxdb_thresholds || '{}', {}),
     });
   }
 
@@ -309,8 +317,8 @@ router.get('/api/metrics', async (req, res) => {
   if (cache.data && (now - cache.ts) < interval * 1000) {
     return res.json({
       ...cache.data,
-      panel_config: parseJSON(settings.influxdb_panel_config || '{}', {}),
-      thresholds:   parseJSON(settings.influxdb_thresholds   || '{}', {}),
+      panel_config: buildPanelConfig(settings),
+      thresholds:   parseJSON(settings.influxdb_thresholds || '{}', {}),
     });
   }
 
@@ -320,10 +328,11 @@ router.get('/api/metrics', async (req, res) => {
   );
 
   try {
-    const [mainResp, storageResp, borgData] = await Promise.all([
+    const [mainResp, storageResp, borgData, pbsData] = await Promise.all([
       influxFetch(FLUX_QUERY(bucket)),
       influxFetch(STORAGE_QUERY(bucket)),
       fetchBorgStatus(settings).catch(() => ({ status: 'unknown' })),
+      fetchPbsStatus(settings).catch(() => ({ connected: false, status: 'unknown' })),
     ]);
 
     if (!mainResp.ok) {
@@ -389,11 +398,26 @@ router.get('/api/metrics', async (req, res) => {
       result.status = 'degraded';
     }
 
+    // PBS degraded conditions
+    result.pbs_status = pbsData.status || 'unknown';
+    if (pbsData.connected) {
+      const pbsCfg = parseJSON(settings.pbs_status_config || '{}', {});
+      if (pbsCfg.backup_failed       && pbsData.last_backup && pbsData.last_backup.status !== 'OK')   result.status = 'degraded';
+      if (pbsCfg.backup_warning      && pbsData.status === 'warning')                                  result.status = 'degraded';
+      if (pbsCfg.verification_stale  && pbsData.verification_stale)                                    result.status = 'degraded';
+      if (pbsCfg.prune_stale         && pbsData.prune_stale)                                           result.status = 'degraded';
+      if (pbsCfg.gc_stale            && pbsData.gc_stale)                                              result.status = 'degraded';
+      if (pbsCfg.storage_critical) {
+        const thr = pbsCfg.storage_critical_threshold || 90;
+        if (pbsData.datastores?.some(d => d.used_pct >= thr)) result.status = 'degraded';
+      }
+    }
+
     cache = { data: result, ts: now };
     res.json({
       ...result,
-      panel_config: parseJSON(settings.influxdb_panel_config || '{}', {}),
-      thresholds:   parseJSON(settings.influxdb_thresholds   || '{}', {}),
+      panel_config: buildPanelConfig(settings),
+      thresholds:   parseJSON(settings.influxdb_thresholds || '{}', {}),
     });
   } catch (err) {
     res.json({ status: 'error', message: err.message });

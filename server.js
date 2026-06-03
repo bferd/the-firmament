@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 const db        = require('./database/db');
 const metricsRouter          = require('./routes/metrics');
 const { router: borgRouter } = require('./routes/borg');
+const { router: pbsRouter  } = require('./routes/pbs');
 
 // Run seed if database is empty
 const catCount = db.prepare('SELECT COUNT(*) as c FROM categories').get().c;
@@ -806,7 +807,7 @@ app.delete('/api/admin/favicon/:slot', (req, res) => {
  *
  * Current secrets: influxdb_token, borg_token
  */
-const EXPORT_EXCLUDE = ['influxdb_token', 'borg_token'];
+const EXPORT_EXCLUDE = ['influxdb_token', 'borg_token', 'pbs_token'];
 
 app.get('/api/admin/settings/export', (req, res) => {
   const rows     = db.prepare('SELECT key, value FROM settings').all();
@@ -928,9 +929,10 @@ app.get('/api/influxdb-storages', requireAuth, async (req, res) => {
   }
 });
 
-// ── Metrics + Borg routes ─────────────────────────────────────────────────
+// ── Metrics + Borg + PBS routes ───────────────────────────────────────────
 app.use(metricsRouter);
 app.use(borgRouter);
+app.use(pbsRouter);
 
 // ── SPA fallback for /admin ────────────────────────────────────────────────
 app.get('/admin', (req, res) => {

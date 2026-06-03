@@ -384,6 +384,8 @@ let metricsState = {
   borgRepos:         [],
   borgRepoNames:     {},
   borgConnected:     false,
+  pbsConnected:      false,
+  pbsStatusConfig:   {},
 };
 
 function getBorgDisplayName(repoName) {
@@ -399,11 +401,11 @@ function renderNodeMappings() {
   const container = document.getElementById('node-mappings-list');
   container.innerHTML = '';
   for (const node of metricsState.nodeMappings) {
-    container.appendChild(buildNodeBlock(node.host, node.display, node.disk_storage || '', null, metricsState.availableStorages));
+    container.appendChild(buildNodeBlock(node.host, node.display, node.disk_storage || '', null, metricsState.availableStorages, node.node_type || ''));
   }
 }
 
-function buildNodeBlock(host, display, diskStorage, availableHosts, availableStorages) {
+function buildNodeBlock(host, display, diskStorage, availableHosts, availableStorages, nodeType) {
   const thr = metricsState.thresholds[host] || { cpu: 85, ram: 90, disk: 90 };
   const block = document.createElement('div');
   block.className    = 'node-mapping-block';
@@ -434,6 +436,13 @@ function buildNodeBlock(host, display, diskStorage, availableHosts, availableSto
       <div class="form-group">
         <label>Display Name</label>
         <input type="text" class="node-display" value="${escHtml(display)}" placeholder="Node Display Name">
+      </div>
+      <div class="form-group">
+        <label>&nbsp;</label>
+        <div class="checkbox-row">
+          <input type="checkbox" class="node-pbs-type"${nodeType === 'pbs' ? ' checked' : ''}>
+          <label>PBS Node</label>
+        </div>
       </div>
       <div class="form-group" style="justify-content:flex-end;padding-bottom:0">
         <label>&nbsp;</label>
@@ -468,6 +477,7 @@ function buildNodeBlock(host, display, diskStorage, availableHosts, availableSto
   `;
   block.querySelector('.node-host').addEventListener('change', syncNodeCheckboxes);
   block.querySelector('.node-display').addEventListener('change', syncNodeCheckboxes);
+  block.querySelector('.node-pbs-type').addEventListener('change', syncNodeCheckboxes);
   return block;
 }
 
@@ -489,6 +499,17 @@ function syncNodeCheckboxes() {
   refreshCheckboxList('status-watch-nodes', hosts, metricsState.statusConfig.watch_nodes || hosts);
   refreshCheckboxList('panel-show-nodes',   hosts, metricsState.panelConfig.show_nodes   || hosts);
   syncOverrideHostDropdowns(hosts);
+  syncPbsSection();
+}
+
+function syncPbsSection() {
+  const hasPbs = getNodeMappingsFromDOM().some(n => n.node_type === 'pbs');
+  const pbsSettings   = document.getElementById('pbs-settings-section');
+  const pbsStatusGrp  = document.getElementById('status-pbs-group');
+  const pbsPanelGrp   = document.getElementById('panel-pbs-group');
+  if (pbsSettings)  pbsSettings.style.display  = hasPbs ? '' : 'none';
+  if (pbsStatusGrp) pbsStatusGrp.style.display = hasPbs ? '' : 'none';
+  if (pbsPanelGrp)  pbsPanelGrp.style.display  = hasPbs ? '' : 'none';
 }
 
 function syncOverrideHostDropdowns(hosts) {
@@ -524,6 +545,7 @@ function getNodeMappingsFromDOM() {
     };
     const disk_storage = block.querySelector('.node-disk-storage')?.value?.trim() || '';
     if (disk_storage) mapping.disk_storage = disk_storage;
+    if (block.querySelector('.node-pbs-type')?.checked) mapping.node_type = 'pbs';
     return mapping;
   });
 }
@@ -606,6 +628,34 @@ function renderStatusConfig() {
   document.getElementById('watch-offline').checked = cfg.alert_on_offline !== false;
 
   renderStatusBorgSection();
+  renderPbsStatusSection();
+}
+
+function renderPbsStatusSection() {
+  const cfg = metricsState.pbsStatusConfig || {};
+  const setChk = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
+  setChk('watch-pbs-backup-failed',   cfg.backup_failed        ?? true);
+  setChk('watch-pbs-backup-warning',  cfg.backup_warning       ?? false);
+  setChk('watch-pbs-verify-stale',    cfg.verification_stale   ?? true);
+  setChk('watch-pbs-prune-stale',     cfg.prune_stale          ?? false);
+  setChk('watch-pbs-gc-stale',        cfg.gc_stale             ?? false);
+  setChk('watch-pbs-storage-critical',cfg.storage_critical     ?? false);
+  const thrEl = document.getElementById('watch-pbs-storage-threshold');
+  if (thrEl) thrEl.value = cfg.storage_critical_threshold ?? 90;
+}
+
+function getPbsStatusConfigFromDOM() {
+  const get   = (id) => document.getElementById(id);
+  const chk   = (id) => get(id)?.checked ?? false;
+  return {
+    backup_failed:              chk('watch-pbs-backup-failed'),
+    backup_warning:             chk('watch-pbs-backup-warning'),
+    verification_stale:         chk('watch-pbs-verify-stale'),
+    prune_stale:                chk('watch-pbs-prune-stale'),
+    gc_stale:                   chk('watch-pbs-gc-stale'),
+    storage_critical:           chk('watch-pbs-storage-critical'),
+    storage_critical_threshold: parseInt(get('watch-pbs-storage-threshold')?.value || '90', 10),
+  };
 }
 
 function renderStatusBorgSection() {
@@ -687,6 +737,14 @@ function renderPanelConfig() {
   });
 
   renderBorgPanelCheckboxes();
+  renderPbsPanelSection();
+}
+
+function renderPbsPanelSection() {
+  const el = document.getElementById('panel-show-pbs');
+  if (!el) return;
+  const cfg = metricsState.panelConfig || {};
+  el.checked = cfg.show_pbs !== false;
 }
 
 function renderBorgPanelCheckboxes() {
@@ -716,7 +774,8 @@ function getPanelConfigFromDOM() {
     return el && el.checked;
   });
   const showBorg = [...document.querySelectorAll('#panel-show-borg input:checked')].map(i => i.value);
-  return { show_nodes: showNodes, show_metrics: showMetrics, show_borg: showBorg };
+  const showPbs  = document.getElementById('panel-show-pbs')?.checked ?? true;
+  return { show_nodes: showNodes, show_metrics: showMetrics, show_borg: showBorg, show_pbs: showPbs };
 }
 
 // ── Borg repo display names ───────────────────────────────────────────────
@@ -849,6 +908,7 @@ document.getElementById('metrics-settings-form').addEventListener('submit', asyn
     influxdb_thresholds:       JSON.stringify(thresholds),
     influxdb_overrides:        JSON.stringify(overrides),
     influxdb_status_config:    JSON.stringify(statusConfig),
+    pbs_status_config:         JSON.stringify(getPbsStatusConfigFromDOM()),
   };
   const panelPayload = { influxdb_panel_config: JSON.stringify(panelConfig) };
 
@@ -867,10 +927,11 @@ document.getElementById('metrics-settings-form').addEventListener('submit', asyn
     return;
   }
   if (!connBlocked) {
-    metricsState.nodeMappings = nodeMappings;
-    metricsState.thresholds   = thresholds;
-    metricsState.overrides    = overrides;
-    metricsState.statusConfig = statusConfig;
+    metricsState.nodeMappings  = nodeMappings;
+    metricsState.thresholds    = thresholds;
+    metricsState.overrides     = overrides;
+    metricsState.statusConfig  = statusConfig;
+    metricsState.pbsStatusConfig = getPbsStatusConfigFromDOM();
     toast('Metrics settings saved');
   } else {
     toast('Panel display saved');
@@ -904,6 +965,34 @@ document.getElementById('btn-test-borg').addEventListener('click', async () => {
   resultEl.value = 'Connecting...';
   try {
     const data = await api('GET', '/api/borg-status');
+    resultEl.value = JSON.stringify(data, null, 2);
+  } catch (err) {
+    resultEl.value = 'Error: ' + err.message;
+  }
+});
+
+document.getElementById('pbs-settings-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    await api('PUT', '/api/admin/settings', {
+      pbs_url:              document.getElementById('set-pbs-url').value.trim(),
+      pbs_token:            document.getElementById('set-pbs-token').value.trim(),
+      pbs_refresh_interval: document.getElementById('set-pbs-interval').value.trim() || '60',
+      pbs_task_limit:       document.getElementById('set-pbs-task-limit').value.trim() || '50',
+    });
+    toast('PBS settings saved');
+  } catch (err) {
+    if (err.isDemo) return;
+    toast('Error saving PBS settings', 'error');
+  }
+});
+
+document.getElementById('btn-test-pbs')?.addEventListener('click', async () => {
+  const resultEl = document.getElementById('pbs-test-result');
+  if (!resultEl) return;
+  resultEl.value = 'Connecting...';
+  try {
+    const data = await api('GET', '/api/pbs-status');
     resultEl.value = JSON.stringify(data, null, 2);
   } catch (err) {
     resultEl.value = 'Error: ' + err.message;
@@ -2159,14 +2248,16 @@ function initExportImport() {
 }
 
 async function loadSettings() {
-  const [settings, storagesData, borgStatus] = await Promise.all([
+  const [settings, storagesData, borgStatus, pbsStatus] = await Promise.all([
     api('GET', '/api/admin/settings'),
     api('GET', '/api/influxdb-storages').catch(() => ({ storages: [] })),
     api('GET', '/api/borg-status').catch(() => null),
+    api('GET', '/api/pbs-status').catch(() => null),
   ]);
   metricsState.availableStorages = storagesData.storages || [];
   metricsState.borgRepos     = (borgStatus?.repositories || []).map(r => r.name);
   metricsState.borgConnected = borgStatus?.connected ?? false;
+  metricsState.pbsConnected  = pbsStatus?.connected  ?? false;
 
   document.getElementById('set-influx-url').value      = settings.influxdb_url      || '';
   document.getElementById('set-influx-token').value    = settings.influxdb_token    || '';
@@ -2178,6 +2269,16 @@ async function loadSettings() {
   document.getElementById('set-borg-token').value    = settings.borg_token            || '';
   document.getElementById('set-borg-interval').value = settings.borg_refresh_interval || '60';
   document.getElementById('set-borg-enabled').checked = settings.borg_enabled !== 'false';
+
+  const pbsUrlEl = document.getElementById('set-pbs-url');
+  if (pbsUrlEl) {
+    pbsUrlEl.value = settings.pbs_url || '';
+    document.getElementById('set-pbs-token').value     = settings.pbs_token            || '';
+    document.getElementById('set-pbs-interval').value  = settings.pbs_refresh_interval || '60';
+    document.getElementById('set-pbs-task-limit').value = settings.pbs_task_limit      || '50';
+  }
+
+  metricsState.pbsStatusConfig = parseJSON(settings.pbs_status_config || '{}', {});
 
   const noVidEl = document.getElementById('show-no-videos-message');
   if (noVidEl) noVidEl.checked = settings.show_no_videos_message !== 'false';
@@ -2201,6 +2302,7 @@ async function loadSettings() {
   }
 
   renderNodeMappings();
+  syncPbsSection();
   renderStatusConfig();
   renderPanelConfig();
   renderOverrides();

@@ -85,7 +85,7 @@ const _defaultNodeMappings = JSON.stringify([
   { host: 'proxmox2',               display: 'Node 2' },
   { host: 'proxmox3',               display: 'Node 3' },
   { host: 'proxmox4',               display: 'Node 4' },
-  { host: 'proxmox-backup-server',  display: 'Node 5' },
+  { host: 'proxmox-backup-server',  display: 'Node 5', node_type: 'pbs' },
 ]);
 const _defaultThresholds = JSON.stringify({
   proxmox:               { cpu: 85, ram: 90, disk: 90 },
@@ -121,6 +121,19 @@ for (const [k, v] of [
   ['borg_enabled',              'true'],
   ['borg_refresh_interval',     '60'],
   ['borg_repository_names',     '{}'],
+  ['pbs_url',                   'https://localhost:8007'],
+  ['pbs_token',                 ''],
+  ['pbs_refresh_interval',      '60'],
+  ['pbs_task_limit',            '50'],
+  ['pbs_status_config',         JSON.stringify({
+    backup_failed:              true,
+    backup_warning:             false,
+    verification_stale:         true,
+    prune_stale:                false,
+    gc_stale:                   false,
+    storage_critical:           false,
+    storage_critical_threshold: 90,
+  })],
 
   // Theme & appearance
   ['theme_preset',             'firmament'],
@@ -184,6 +197,19 @@ for (const [k, v] of [
   // Media behaviour
   ['show_no_videos_message', 'true'],
   ['auth_recheck_interval',  '300000'],
+
+  // Demo PBS data — timestamps computed at init so time_ago stays fresh via buildPbsResult
+  ['demo_pbs_data', (() => {
+    const _n = Math.floor(Date.now() / 1000);
+    return JSON.stringify({
+      datastores: [{ store: 'main', total: 4000137281536, used: 1288490188800, avail: 2711647092736 }],
+      last_backup_ts:     _n - 3 * 3600,
+      last_backup_status: 'OK',
+      last_verify_ts:     _n - 2 * 86400,
+      last_prune_ts:      _n - 86400,
+      last_gc_ts:         _n - 2 * 86400,
+    });
+  })()],
 ]) { _ig.run(k, v); }
 
 module.exports = db;

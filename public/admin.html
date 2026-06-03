@@ -774,6 +774,22 @@
               <div id="status-watch-borg" class="checkbox-list"></div>
               <div id="status-borg-note" class="metrics-sub-desc" style="margin-top:0.4rem;display:none"></div>
             </div>
+            <div class="form-group" id="status-pbs-group" style="display:none">
+              <label>PBS conditions</label>
+              <div class="checkbox-list">
+                <label class="checkbox-item"><input type="checkbox" id="watch-pbs-backup-failed" checked> Backup failed</label>
+                <label class="checkbox-item"><input type="checkbox" id="watch-pbs-backup-warning"> Backup warning</label>
+                <label class="checkbox-item"><input type="checkbox" id="watch-pbs-verify-stale" checked> Verify stale (&gt;10d)</label>
+                <label class="checkbox-item"><input type="checkbox" id="watch-pbs-prune-stale"> Prune stale (&gt;7d)</label>
+                <label class="checkbox-item"><input type="checkbox" id="watch-pbs-gc-stale"> GC stale (&gt;7d)</label>
+                <label class="checkbox-item" style="display:flex;align-items:center;gap:0.35rem;flex-wrap:wrap">
+                  <input type="checkbox" id="watch-pbs-storage-critical">
+                  <span>Storage critical &gt;</span>
+                  <input type="number" id="watch-pbs-storage-threshold" min="1" max="100" value="90" style="width:54px;padding:0.2rem 0.35rem;background:var(--bg2,#060d18);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.78rem">
+                  <span>%</span>
+                </label>
+              </div>
+            </div>
           </div>
 
           <div class="metrics-sub-title" style="margin-top:1.5rem">Right Panel Display</div>
@@ -796,6 +812,12 @@
             <div class="form-group">
               <label>Backup to show</label>
               <div id="panel-show-borg" class="checkbox-list"></div>
+            </div>
+            <div class="form-group" id="panel-pbs-group" style="display:none">
+              <label>PBS to show</label>
+              <div class="checkbox-list">
+                <label class="checkbox-item"><input type="checkbox" id="panel-show-pbs" checked> PBS Backup</label>
+              </div>
             </div>
           </div>
 
@@ -869,7 +891,48 @@
         </div>
       </div>
 
-      <!-- ── 8. EXPORT / IMPORT ─────────────────────────────────────────── -->
+      <!-- ── 8. PBS BACKUP METRICS ────────────────────────────────────────── -->
+      <div class="admin-card section-gap" id="pbs-settings-section" style="display:none">
+        <div class="admin-card-title">Backup Metrics (PBS)</div>
+        <div class="metrics-sub-desc">Proxmox Backup Server integration. Requires API token access to your PBS instance.</div>
+        <form id="pbs-settings-form">
+          <div class="form-row">
+            <div class="form-group" style="flex:2 1 260px">
+              <label>PBS URL</label>
+              <input id="set-pbs-url" type="text" placeholder="https://pbs.example.com:8007">
+            </div>
+            <div class="form-group" style="flex:3 1 320px">
+              <label>API Token</label>
+              <input id="set-pbs-token" type="password" placeholder="user@pbs!tokenname:secret" autocomplete="off">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Refresh Interval (s)</label>
+              <input id="set-pbs-interval" type="number" min="30" max="3600" placeholder="60">
+            </div>
+            <div class="form-group">
+              <label>Task Limit</label>
+              <input id="set-pbs-task-limit" type="number" min="10" max="500" placeholder="50">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save PBS Settings</button>
+          </div>
+        </form>
+
+        <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem">
+          <div class="admin-card-title">Test Connection</div>
+          <div style="margin-bottom:0.75rem">
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-test-pbs">Test Connection</button>
+          </div>
+          <textarea id="pbs-test-result" rows="10" readonly
+            style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:0.72rem;padding:0.75rem;resize:vertical;outline:none"
+            placeholder="Result will appear here..."></textarea>
+        </div>
+      </div>
+
+      <!-- ── 9. EXPORT / IMPORT ─────────────────────────────────────────── -->
       <div class="admin-card section-gap">
         <div class="admin-card-title">EXPORT / IMPORT</div>
         <div class="metrics-sub-desc">Export all settings to a JSON file, or import from a previously exported file. Tokens (InfluxDB, Borg) are never exported or imported.</div>

@@ -78,6 +78,7 @@ upsert.run('influxdb_node_mappings', JSON.stringify([
   { host: 'node-2', display: 'Node 2' },
   { host: 'node-3', display: 'Node 3' },
   { host: 'node-4', display: 'Node 4' },
+  { host: 'pbs-1',  display: 'PBS',    node_type: 'pbs' },
 ]));
 
 // ── Settings: demo metrics data ────────────────────────────────────────────
@@ -88,6 +89,7 @@ upsert.run('demo_metrics_data', JSON.stringify({
     { host: 'node-2', display_name: 'Node 2', object: 'node', cpu:  8.1, ram: 44.7, disk: 52.1, uptime: '28d 7h',  loadavg: 0.31, offline: false },
     { host: 'node-3', display_name: 'Node 3', object: 'node', cpu: 41.6, ram: 78.3, disk: 67.4, uptime: '5d 11h',  loadavg: 2.14, offline: false },
     { host: 'node-4', display_name: 'Node 4', object: 'node', cpu: 15.9, ram: 55.8, disk: 45.2, uptime: '19d 2h',  loadavg: 0.62, offline: false },
+    { host: 'pbs-1',  display_name: 'PBS',    object: 'node', cpu:  3.2, ram: 31.7, disk: 32.1, uptime: '33d 1h',  loadavg: 0.18, offline: false },
   ],
   containers: [
     { host: 'jellyfin',      display_name: 'JELLYFIN',      object: 'lxc',  cpu:  4.2, ram: 38.1, disk: 22.4, uptime: '12d 4h', loadavg: null, offline: false },
@@ -178,6 +180,27 @@ upsert.run('demo_borg_data', JSON.stringify({
   },
 }));
 
+// ── Settings: demo PBS backup data ─────────────────────────────────────────
+// Stores raw Unix timestamps only — time_ago is computed at request time by buildPbsResult
+upsert.run('demo_pbs_data', JSON.stringify({
+  datastores: [{ store: 'main', total: 4000137281536, used: 1288490188800, avail: 2711647092736 }],
+  last_backup_ts:     now - 3  * 3600,
+  last_backup_status: 'OK',
+  last_verify_ts:     now - 2  * 86400,
+  last_prune_ts:      now - 1  * 86400,
+  last_gc_ts:         now - 2  * 86400,
+}));
+
+upsert.run('pbs_status_config', JSON.stringify({
+  backup_failed:              true,
+  backup_warning:             false,
+  verification_stale:         true,
+  prune_stale:                false,
+  gc_stale:                   false,
+  storage_critical:           false,
+  storage_critical_threshold: 90,
+}));
+
 // ── Settings: portal appearance ────────────────────────────────────────────
 upsert.run('footer_show_link', 'false');
 
@@ -191,8 +214,9 @@ upsert.run('welcome_modal_once_per_session', 'true');
 console.log('Done.');
 console.log(`  ${catDefs.length} categories: ${catDefs.map(c => c.name).join(', ')}`);
 console.log(`  ${svcDefs.length} services across all categories`);
-console.log('  4 node mappings: Node 1, Node 2, Node 3, Node 4');
-console.log('  demo_metrics_data: 4 nodes, 8 containers, 5 storages');
+console.log('  5 node mappings: Node 1, Node 2, Node 3, Node 4, PBS (node_type: pbs)');
+console.log('  demo_metrics_data: 5 nodes, 8 containers, 5 storages');
 console.log('  demo_borg_data: 2 repos (main + offsite), both healthy');
+console.log('  demo_pbs_data: 1 datastore (main, 4 TB), last backup 3h ago, healthy');
 console.log('  footer_show_link: false');
 console.log('  welcome_modal: enabled with demo content');

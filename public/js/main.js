@@ -767,14 +767,17 @@ function startMetricsPoll() {
 
 async function fetchAndDisplayPanelMetrics() {
   try {
-    const [metricsRes, borgRes] = await Promise.all([
+    const [metricsRes, borgRes, pbsRes] = await Promise.all([
       fetch('/api/metrics'),
       fetch('/api/borg-status').catch(() => null),
+      fetch('/api/pbs-status').catch(() => null),
     ]);
     const data     = await metricsRes.json();
     const borgData = borgRes ? await borgRes.json().catch(() => null) : null;
+    const pbsData  = pbsRes  ? await pbsRes.json().catch(() => null)  : null;
     updatePanelMetrics(data);
     updatePanelBackup(borgData, data.panel_config);
+    updatePanelPbs(pbsData, data.panel_config);
 
     // Rebuild offline host set and update card states
     offlineHosts = new Set();
@@ -923,6 +926,48 @@ function updatePanelBackup(data, panelConfig) {
     }
   }
   el.innerHTML = parts.join('');
+}
+
+function updatePanelPbs(data, panelConfig) {
+  const el = document.getElementById('panel-backup-summary');
+  if (!el) return;
+
+  // Skip if PBS nodes are not configured, or panel config hides it
+  if (!panelConfig?.has_pbs_nodes) return;
+  if (panelConfig?.show_pbs === false) return;
+
+  if (!data || data.error === 'not configured') return;
+
+  const parts = ['<div class="panel-backup-divider"></div>'];
+  parts.push('<div class="panel-backup-label">PBS BACKUP</div>');
+
+  if (!data.connected) {
+    parts.push('<div class="panel-backup-status"><span class="panel-backup-dot unavailable">&#9679;</span> UNAVAILABLE</div>');
+    el.insertAdjacentHTML('beforeend', parts.join(''));
+    return;
+  }
+
+  const dotMap = { healthy: 'healthy', warning: 'warning', degraded: 'failed', unknown: 'unavailable' };
+  const dotClass = dotMap[data.status] || 'unavailable';
+  const lb = data.last_backup;
+
+  if (lb) {
+    const timeStr = lb.time_ago || '—';
+    const suffix  = lb.status && lb.status !== 'OK' ? ` · ${lb.status}` : '';
+    parts.push(`<div class="panel-backup-status"><span class="panel-backup-dot ${dotClass}">&#9679;</span> ${escHtml(timeStr)}${escHtml(suffix)}</div>`);
+  } else {
+    parts.push('<div class="panel-backup-status"><span class="panel-backup-dot unavailable">&#9679;</span> No backups yet</div>');
+  }
+
+  if (data.datastores?.length) {
+    const ds = data.datastores[0];
+    parts.push(`<div class="panel-backup-stat">${escHtml(ds.store)}: ${escHtml(ds.used_display)} / ${escHtml(ds.total_display)}</div>`);
+  }
+  if (data.last_verify) {
+    parts.push(`<div class="panel-backup-stat">Verify: ${escHtml(data.last_verify.time_ago || '—')}</div>`);
+  }
+
+  el.insertAdjacentHTML('beforeend', parts.join(''));
 }
 
 function escHtml(str) {
