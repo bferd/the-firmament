@@ -18,6 +18,7 @@ function formatBytes(bytes) {
   if (bytes >= 1e12) return (bytes / 1e12).toFixed(1) + ' TB';
   if (bytes >= 1e9)  return (bytes / 1e9).toFixed(1)  + ' GB';
   if (bytes >= 1e6)  return (bytes / 1e6).toFixed(1)  + ' MB';
+  if (bytes >= 1e3)  return (bytes / 1e3).toFixed(1)  + ' KB';
   return bytes + ' B';
 }
 
@@ -165,7 +166,11 @@ async function fetchBorgStatus(settings) {
       repoStatus = 'unknown';
     } else if (lastSuccess === 0) {
       repoStatus = 'degraded';
-    } else if (backupFailed > 0) {
+    } else if (backupOrphaned > 0) {
+      repoStatus = 'warning';
+    } else if (lastBackupTs && (Date.now() / 1000 - lastBackupTs) > 93600) {
+      repoStatus = 'warning';
+    } else if (lastCheckTs && (Date.now() / 1000 - lastCheckTs) > 864000) {
       repoStatus = 'warning';
     } else {
       repoStatus = 'healthy';
