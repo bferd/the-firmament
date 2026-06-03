@@ -834,13 +834,26 @@
         </form>
 
         <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem">
-          <div class="admin-card-title">Test Connection</div>
-          <div style="margin-bottom:0.75rem">
-            <button type="button" class="btn btn-secondary btn-sm" id="btn-test-influx">Test Connection</button>
+          <div id="influx-test-split-container">
+            <div class="influx-test-half">
+              <div class="admin-card-title" id="influx-test-pve-title">Test Connection</div>
+              <div style="margin-bottom:0.75rem">
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-test-influx">Test Connection</button>
+              </div>
+              <textarea id="influx-test-result" rows="10" readonly
+                style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:0.72rem;padding:0.75rem;resize:vertical;outline:none"
+                placeholder="Result will appear here..."></textarea>
+            </div>
+            <div class="influx-test-half" id="influx-test-pbs-half" style="display:none">
+              <div class="admin-card-title">Test PBS Connection</div>
+              <div style="margin-bottom:0.75rem">
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-test-pbs-influx">Test PBS Connection</button>
+              </div>
+              <textarea id="influx-pbs-test-result" rows="10" readonly
+                style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:0.72rem;padding:0.75rem;resize:vertical;outline:none"
+                placeholder="Result will appear here..."></textarea>
+            </div>
           </div>
-          <textarea id="influx-test-result" rows="10" readonly
-            style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:0.72rem;padding:0.75rem;resize:vertical;outline:none"
-            placeholder="Result will appear here..."></textarea>
         </div>
       </div>
 

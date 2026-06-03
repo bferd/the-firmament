@@ -607,10 +607,21 @@ tr.metrics-warn td { background: rgba(239, 68, 68, 0.04); }
 
 .node-mapping-row {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: 1fr 1fr auto auto;
   gap: 0.75rem;
   align-items: end;
   padding: 0.75rem;
+}
+
+/* ── Influx split test connection ────────────────────────────────────────── */
+#influx-test-split-container.split {
+  display: flex;
+  gap: 1rem;
+}
+
+.influx-test-half {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .node-thresholds {

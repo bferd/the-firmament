@@ -936,13 +936,14 @@ function updatePanelPbs(data, panelConfig) {
   if (!panelConfig?.has_pbs_nodes) return;
   if (panelConfig?.show_pbs === false) return;
 
-  if (!data || data.error === 'not configured') return;
+  if (!data) return;
 
   const parts = ['<div class="panel-backup-divider"></div>'];
   parts.push('<div class="panel-backup-label">PBS BACKUP</div>');
 
   if (!data.connected) {
-    parts.push('<div class="panel-backup-status"><span class="panel-backup-dot unavailable">&#9679;</span> UNAVAILABLE</div>');
+    const label = data.error === 'not configured' ? 'NOT CONFIGURED' : 'UNAVAILABLE';
+    parts.push(`<div class="panel-backup-status"><span class="panel-backup-dot unavailable">&#9679;</span> ${label}</div>`);
     el.insertAdjacentHTML('beforeend', parts.join(''));
     return;
   }
