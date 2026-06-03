@@ -224,6 +224,63 @@ docker compose up -d --build
 
 > **Note:** InfluxDB and Borg-UI tokens are configured through the admin panel at `/admin` — not in `.env`.
 
+## Proxmox Backup Server (PBS) Integration
+
+The Firmament can display live PBS status in the right panel, including datastore usage, last backup, verification, prune, and GC job timestamps.
+
+### Setup
+
+#### 1. Create a PBS API Token
+
+In the PBS web UI at `https://your-pbs-ip:8007`:
+
+1. Go to **Configuration → Access Control → API Tokens**
+2. Click **Add**, select user `root@pam`, enter a token name (e.g. `firmament`)
+3. Copy the token secret — it is only shown once
+
+Then go to **Configuration → Access Control → Permissions → Add**:
+- Path: `/`
+- API Token: `root@pam!firmament`
+- Role: `Audit`
+- Propagate: ✅
+
+This gives the token read-only access to all datastores and task history, including any datastores added in future.
+
+#### 2. Mark the PBS node
+
+In the admin panel under **Settings → InfluxDB → Node Mappings**, find your PBS node entry and check the **PBS Node** checkbox. This enables the PBS Settings section and PBS card in the right panel automatically.
+
+#### 3. Configure PBS Settings
+
+Once a node is marked as PBS, a **Backup Metrics (PBS)** section appears in the admin panel. Fill in:
+
+| Field | Description |
+|-------|-------------|
+| PBS URL | Full URL to your PBS instance, e.g. `https://192.168.1.8:8007` |
+| API Token | Full token string, e.g. `root@pam!firmament:your-token-secret` |
+| Node Name | PBS node hostname (default: `proxmox-backup-server`) |
+| Refresh Interval | How often to poll PBS in seconds (default: `60`) |
+| Task Limit | Number of recent tasks to fetch for job history (default: `50`) |
+
+Click **Save PBS Settings**, then **Test Connection** to verify.
+
+#### 4. Configure Status triggers
+
+In **Status Configuration → PBS Conditions**, choose which conditions trigger **SYSTEMS DEGRADED**:
+
+| Condition | Description |
+|-----------|-------------|
+| Backup Failed | Most recent backup task status is not OK |
+| Backup Warning | A backup has failed historically but most recent succeeded |
+| Verify Stale >10d | Last verification job older than 10 days |
+| Prune Stale >7d | Last prune job older than 7 days |
+| GC Stale >7d | Last garbage collection older than 7 days |
+| Storage Critical | Datastore used % exceeds configured threshold (default 90%) |
+
+#### 5. Right panel display
+
+In **Right Panel Display → PBS to Show**, check **PBS Backup** to show the PBS card in the right panel. The card displays datastore usage, last backup status, last verification, and last prune/GC timestamps.
+
 ## Theming & Customization
 
 Themes are fully configured through the admin panel — no CSS edits required for normal use. If you do customize the stylesheet directly, the primary and secondary accent colours use these CSS variables:
