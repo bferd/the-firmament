@@ -36,7 +36,7 @@ A live demo is available at [demo.schroth.ca](https://demo.schroth.ca).
 
 ## Stack
 
-- Node.js + Express
+- Node.js 20+ + Express
 - SQLite (better-sqlite3)
 - Vanilla HTML/CSS/JS
 - Docker (two-stage build, ~400MB image)
@@ -215,7 +215,8 @@ the `/videos` directory:
 ### 7. Build and start
 
 ```bash
-sudo chown -R 1000:1000 data fonts videos public #the bind mounts in docker-compose.ymlinstructions above
+# Fix ownership of bind-mounted directories before first run
+sudo chown -R 1000:1000 data fonts videos public
 
 docker compose up -d --build
 ```
