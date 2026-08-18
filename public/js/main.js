@@ -38,6 +38,8 @@ const servicesEl  = document.getElementById('services');
 const siteHeader  = document.getElementById('site-header');
 const authBadge = document.getElementById('auth-badge');
 const authName  = document.getElementById('auth-name');
+const panelToggle   = document.getElementById('panel-toggle');
+const panelBackdrop = document.getElementById('panel-backdrop');
 
 // ── Transition video — dynamic element for fresh decode context ───────────
 const transitionVideo = document.createElement('video');
@@ -194,6 +196,28 @@ function unlockScroll() {
   window.removeEventListener('touchstart', onTouchStart);
   window.removeEventListener('touchmove',  onTouchMove);
 }
+
+// ── Panel drawer (narrow viewports only — no-op at desktop widths since
+// .drawer-open only has an effect inside the @media (max-width: 768px) rules) ──
+function openPanelDrawer() {
+  engelPanel.classList.add('drawer-open');
+  panelBackdrop.classList.add('active');
+  panelToggle.setAttribute('aria-expanded', 'true');
+}
+
+function closePanelDrawer() {
+  engelPanel.classList.remove('drawer-open');
+  panelBackdrop.classList.remove('active');
+  panelToggle.setAttribute('aria-expanded', 'false');
+}
+
+if (panelToggle) {
+  panelToggle.addEventListener('click', () => {
+    if (engelPanel.classList.contains('drawer-open')) closePanelDrawer();
+    else openPanelDrawer();
+  });
+}
+if (panelBackdrop) panelBackdrop.addEventListener('click', closePanelDrawer);
 
 // ── Transition ────────────────────────────────────────────────────────────
 // R3: only fires when scrollAccum === SCROLL_THRESHOLD (both videos at opacity 0)
@@ -377,6 +401,7 @@ const heroObserver = new IntersectionObserver((entries) => {
       // Hide panel, restore hero
       engelPanel.classList.remove('visible');
       mainContent.classList.remove('panel-open');
+      closePanelDrawer();
       // Restore hero bg video opacity
       heroBgVideo.style.opacity = '1';
       // Restart idle loop in hero
@@ -494,6 +519,7 @@ async function boot() {
   engelPanel.style.transition = '';
   engelPanel.classList.remove('visible');
   mainContent.classList.remove('panel-open');
+  closePanelDrawer();
   siteHeader.classList.remove('visible');
 
   lockScroll();
@@ -1099,8 +1125,12 @@ function applyMobilePanelVisibility(setting) {
         services.style.paddingLeft  = panelOnLeft ? '1rem' : '';
       }
       if (mobileStatus) mobileStatus.style.display = 'block';
+      // Panel is admin-disabled on this device — the drawer toggle would open nothing
+      closePanelDrawer();
+      if (panelToggle) panelToggle.style.display = 'none';
     } else {
       if (panel) panel.style.display = '';
+      if (panelToggle) panelToggle.style.display = '';
       if (services) {
         services.style.marginRight  = '';
         services.style.marginLeft   = '';
@@ -1111,6 +1141,7 @@ function applyMobilePanelVisibility(setting) {
     }
   } else {
     if (panel)        panel.style.display        = '';
+    if (panelToggle)  panelToggle.style.display  = '';
     if (mobileStatus) mobileStatus.style.display = 'none';
   }
 }

@@ -193,7 +193,6 @@ app.use(express.json());
 app.use((req, res, next) => {
   res.setHeader('X-Robots-Tag',           'noindex, nofollow');
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options',        'SAMEORIGIN');
   res.setHeader('X-XSS-Protection',       '1; mode=block');
   res.setHeader('Referrer-Policy',        'strict-origin-when-cross-origin');
   res.setHeader('Content-Security-Policy', [
@@ -204,7 +203,7 @@ app.use((req, res, next) => {
     "media-src 'self'",
     "img-src 'self' data:",
     "connect-src 'self'",
-    "frame-ancestors 'self'",
+    "frame-ancestors 'self' https://homeassistant.schroth.ca http://192.168.1.10:8123",
   ].join('; '));
   next();
 });

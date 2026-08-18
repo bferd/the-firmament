@@ -347,6 +347,45 @@ body::before {
   width: 100%;
 }
 
+/* ── Panel drawer controls (narrow viewports only — see @media 768px) ────── */
+#panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 99;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+
+#panel-toggle {
+  display: none;
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  box-shadow: 0 0 16px rgba(var(--accent-rgb, 0, 229, 255), 0.2), 0 4px 20px rgba(0, 0, 0, 0.4);
+  color: var(--accent);
+  cursor: pointer;
+  z-index: 150;
+  transition: background var(--transition);
+}
+
+#panel-toggle svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
 .panel-engel-name {
   font-family: var(--font-heading, 'Orbitron'), sans-serif;
   font-size: 0.6rem;
@@ -935,11 +974,33 @@ body::before {
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  :root { --panel-w: 0px; }
+  /* Panel becomes a toggleable overlay drawer at narrow viewport widths —
+     applies equally to phones and resized/tiled desktop windows, since this
+     is a layout constraint, not a device-type check. Default closed; only
+     #panel-toggle / backdrop clicks (main.js) add/remove .drawer-open. */
+  #engel-panel {
+    width: min(var(--panel-w), 85vw);
+  }
 
-  /* Panel is 0px wide on mobile — JS adds .visible when threshold reached */
-  #engel-panel { width: 0; overflow: hidden; }
+  #engel-panel.visible {
+    transform: translateX(100%);
+  }
 
+  #engel-panel.visible.drawer-open {
+    transform: translateX(0);
+  }
+
+  #main-content.panel-open ~ #panel-toggle {
+    display: flex;
+  }
+
+  #panel-backdrop.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* Narrow viewport never reserves layout space for the panel — it's an
+     overlay now, not a pushed sidebar */
   #main-content.panel-open { padding-right: var(--gutter); }
 
   /* applyTheme() sets --panel-w via inline style on :root which beats the CSS var
@@ -1009,6 +1070,16 @@ body::before {
 
   .category-name {
     font-size: 0.8rem !important;
+  }
+}
+
+/* Coarse pointers (touch) get a larger hit target for the panel toggle —
+   this only sizes the tap target, it does not decide open/closed behavior,
+   so it never interferes with mouse-driven desktop window resizing. */
+@media (pointer: coarse) {
+  #panel-toggle {
+    width: 52px;
+    height: 52px;
   }
 }
 
