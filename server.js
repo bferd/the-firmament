@@ -456,6 +456,11 @@ app.get('/api/dashboard-summary', async (req, res) => {
     ).all(...THEME_KEYS).forEach(r => { theme[r.key] = r.value; });
 
     const metricsRes = await fetch(`http://localhost:${PORT}/api/metrics`);
+    const pbsRes = await fetch(`http://localhost:${PORT}/api/pbs-status`);
+    const pbs = await pbsRes.json();
+
+    const borgRes = await fetch(`http://localhost:${PORT}/api/borg-status`);
+    const borg = await borgRes.json();
     const metrics = await metricsRes.json();
 
     const offlineHosts = new Set(
@@ -488,6 +493,15 @@ app.get('/api/dashboard-summary', async (req, res) => {
       backup_status: metrics.backup_status,
       pbs_status: metrics.pbs_status,
       nodes_offline: metrics.nodes.filter(n => n.offline).length,
+      pbs_last_backup: pbs.last_backup,
+      pbs_last_verify: pbs.last_verify,
+      pbs_last_prune: pbs.last_prune,
+      pbs_verification_stale: pbs.verification_stale,
+      pbs_prune_stale: pbs.prune_stale,
+      pbs_gc_stale: pbs.gc_stale,
+      borg_last_backup: borg.repositories?.[0]?.last_backup,
+      borg_last_check: borg.repositories?.[0]?.last_check,
+      borg_jobs: borg.repositories?.[0]?.jobs,
       theme: theme.theme_preset,
       accent_primary: theme.theme_accent_primary,
       accent_secondary: theme.theme_accent_secondary,
