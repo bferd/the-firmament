@@ -441,6 +441,63 @@ app.get('/api/services', async (req, res) => {
   res.json(rows);
 });
 
+app.get('/api/dashboard-summary', async (req, res) => {
+  try {
+    const categories = db.prepare('SELECT * FROM categories ORDER BY sort_order, id').all();
+    const services = db.prepare(
+      `SELECT s.*, c.name as category_name, c.colour as category_colour
+       FROM services s LEFT JOIN categories c ON s.category_id = c.id
+       WHERE s.requires_auth = 0
+       ORDER BY c.sort_order, s.sort_order, s.id`
+    ).all();
+    const theme = Object.fromEntries(THEME_KEYS.map(k => [k, null]));
+    db.prepare(
+      `SELECT key, value FROM settings WHERE key IN (${THEME_KEYS.map(() => '?').join(',')})`
+    ).all(...THEME_KEYS).forEach(r => { theme[r.key] = r.value; });
+
+    const metricsRes = await fetch(`http://localhost:${PORT}/api/metrics`);
+    const metrics = await metricsRes.json();
+
+    const offlineHosts = new Set(
+      metrics.containers.filter(c => c.offline).map(c => c.host)
+    );
+
+    const servicesWithStatus = services.map(s => ({
+      id: s.id,
+      name: s.name,
+      category_id: s.category_id,
+      category_name: s.category_name,
+      icon: s.icon,
+      url: s.url,
+      status: offlineHosts.has(s.host_name) ? 'offline' : 'online'
+    }));
+
+    const categoriesWithCounts = categories.map(c => {
+      const inCat = servicesWithStatus.filter(s => s.category_id === c.id);
+      return {
+        id: c.id,
+        name: c.name,
+        colour: c.colour,
+        service_count: inCat.length,
+        offline_count: inCat.filter(s => s.status === 'offline').length
+      };
+    });
+
+    res.json({
+      system_status: metrics.status,
+      theme: theme.theme_preset,
+      accent_primary: theme.theme_accent_primary,
+      accent_secondary: theme.theme_accent_secondary,
+      categories: categoriesWithCounts,
+      services: servicesWithStatus,
+      services_offline: servicesWithStatus.filter(s => s.status === 'offline').length,
+      services_total: servicesWithStatus.length
+    });
+  } catch (err) {
+    console.error('dashboard-summary error:', err);
+    res.status(500).json({ error: 'Failed to build dashboard summary' });
+  }
+});
 // ── Demo mode ─────────────────────────────────────────────────────────────
 app.get('/api/demo-mode', (req, res) => {
   res.json({ demo: DEMO_MODE });
