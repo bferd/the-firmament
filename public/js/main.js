@@ -1108,7 +1108,14 @@ async function bootFast() {
 
 // ── Mobile panel visibility ───────────────────────────────────────────────
 function applyMobilePanelVisibility(setting) {
-  const nowMobile    = Math.min(window.screen.width, window.screen.height) <= 768;
+  // Feature-detect true touch-first devices instead of window.screen size —
+  // screen.width/height is unreliable: it matches many desktop laptop panels
+  // (e.g. 768px-tall displays) and DevTools device emulation spoofs it to the
+  // emulated viewport, both of which falsely flagged real desktop users as mobile.
+  const nowMobile = !!(
+    (navigator.userAgentData && navigator.userAgentData.mobile) ||
+    window.matchMedia('(pointer: coarse) and (hover: none)').matches
+  );
   const panel        = document.getElementById('engel-panel');
   const services     = document.getElementById('services');
   const mobileStatus = document.getElementById('mobile-status');
