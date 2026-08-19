@@ -485,9 +485,16 @@ app.get('/api/dashboard-summary', async (req, res) => {
 
     res.json({
       system_status: metrics.status,
+      backup_status: metrics.backup_status,
+      pbs_status: metrics.pbs_status,
+      nodes_offline: metrics.nodes.filter(n => n.offline).length,
       theme: theme.theme_preset,
       accent_primary: theme.theme_accent_primary,
       accent_secondary: theme.theme_accent_secondary,
+      bg_primary: theme.theme_bg_primary,
+      bg_secondary: theme.theme_bg_secondary,
+      text_primary: theme.theme_text_primary,
+      text_dim: theme.theme_text_dim,
       categories: categoriesWithCounts,
       services: servicesWithStatus,
       services_offline: servicesWithStatus.filter(s => s.status === 'offline').length,
